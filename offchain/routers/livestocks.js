@@ -2,9 +2,10 @@ const router = require('express').Router();
 let Livestock = require("../models/livestock.model");
 
 router.route('/:address').get((req, res) => {
-  console.log(req.query.paginate);
-  const paginate = Number(req.query.paginate);
-  Livestock.find({ address: req.params.address }).skip(paginate).limit(2)
+  const offset = Number(req.query.offset);
+  const perPage = Number(req.query.perPage);
+
+  Livestock.find({ address: req.params.address }).skip(offset).limit(perPage)
     .then((livestocks) => res.json(livestocks))
     .catch((err) => res.status(400).json('Error: ' + err));
 });
