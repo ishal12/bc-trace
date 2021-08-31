@@ -6,7 +6,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { UserContext } from '../../context/userContext'
 import { ContractContext } from '../../context/contractContext'
 import { LscountContext } from '../../context/lscountContext'
-import { LivestocksContext } from '../../context/livestocks'
+// import { LivestocksContext } from '../../context/livestocks'
 import web3 from 'web3'
 import moment from 'moment'
 import axios from 'axios'
@@ -22,8 +22,8 @@ export default function Home() {
 
   const [pagination, setPagination] = useState({
     offset: 0,
-    perPage: 10,
-    pageCount: 100 / 10,
+    perPage: 2,
+    pageCount: 100 / 2,
     currentPage: 1
   })
 
@@ -210,34 +210,15 @@ export default function Home() {
       }
 
       getHewan();
+
     }
+  }, [contract.accounts, pagination.currentPage])
 
-    // console.log("ue: role")
-  }, [contract])
+  const getHewan = () => {
 
-  const getHewan = async () => {
-    // let promise = new Promise((resolve, reject) => {
-    //   let address = contract.accounts[0];
-    //   console.log(address)
-
-    //   if (address === 'undefined') {
-    //     reject(Error('Promise Rejected'));
-    //   }
-    //   else {
-    //     resolve('Promise resolved');
-    //   }
-
-    //   promise.then(result => {
-    //     axios
-    //       .get('http://localhost:3001/livestocks/' + address)
-    //       .then((res) => setLivestocks(res.data))
-    //   })
-    // })
-
-    const hewan = await axios
-      .get(`http://localhost:3001/livestocks/${contract.accounts[0]}?offset=${pagination.offset}&perPage=${pagination.perPage}`)
+    axios
+      .get(`http://localhost:3001/livestocks/${contract.accounts}?offset=${pagination.offset}&perPage=${pagination.perPage}`)
       .then((res) => setLivestocks(res.data))
-    console.log(contract.accounts[0])
   }
 
   const handlePageClick = (e) => {
