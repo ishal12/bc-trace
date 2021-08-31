@@ -11,8 +11,7 @@ import web3 from 'web3'
 import moment from 'moment'
 import axios from 'axios'
 import ReactPaginate from 'react-paginate'
-// import '../../pagination.css'
-// require("bootstrap/less/bootstrap.less");
+import '../../assets/css/pagination.css'
 
 export default function Home() {
   const { contract, setContract } = useContext(ContractContext)
@@ -21,8 +20,12 @@ export default function Home() {
   // const { livestocks, setLivestocks } = useContext(LivestocksContext)
   const [livestocks, setLivestocks] = useState()
 
-  const [pagination, setPagination] = useState(5)
-  const [page, setPage] = useState(10)
+  const [pagination, setPagination] = useState({
+    offset: 0,
+    perPage: 10,
+    pageCount: 100 / 10,
+    currentPage: 1
+  })
 
   const [jabatan, setJabatan] = useState()
   const [ras, setRas] = useState({
@@ -232,9 +235,22 @@ export default function Home() {
     // })
 
     const hewan = await axios
-      .get('http://localhost:3001/livestocks/' + contract.accounts[0] + '?paginate=0')
+      .get(`http://localhost:3001/livestocks/${contract.accounts[0]}?offset=${pagination.offset}&perPage=${pagination.perPage}`)
       .then((res) => setLivestocks(res.data))
     console.log(contract.accounts[0])
+  }
+
+  const handlePageClick = (e) => {
+    const selectedPage = e.selected + 1;
+    const offset = (selectedPage * pagination.perPage) - pagination.perPage;
+
+    setPagination({
+      ...pagination,
+      currentPage: selectedPage,
+      offset: offset
+    }, () => {
+      getHewan();
+    });
   }
 
   return (
@@ -463,34 +479,17 @@ export default function Home() {
                 </tbody>
               </Table>
               <Button as="input" variant="success" className="mr- float-right" onClick={handleShow} type="button" value="Tambah" />
-              {/* <Pagination className="">
-
-
-                {pagination == 1 ? <Pagination.Item active>{pagination}</Pagination.Item> : <Pagination.Item>{pagination - 2}</Pagination.Item>}
-                {pagination == 2 ? <Pagination.Item active>{pagination}</Pagination.Item> : <Pagination.Item>{pagination - 1}</Pagination.Item>}
-                {![1, 2, 9, 10].includes(pagination) ? <Pagination.Item active>{pagination}</Pagination.Item> : <Pagination.Item>{pagination}</Pagination.Item>}
-                {pagination == 9 ? <Pagination.Item active>{pagination}</Pagination.Item> : <Pagination.Item value={pagination + 1} onClick={(e) => setPagination(pagination + 1)}>{pagination + 1}</Pagination.Item>}
-                {pagination == 10 ? <Pagination.Item active>{pagination}</Pagination.Item> : <Pagination.Item>{pagination + 2}</Pagination.Item>}
-
-              </Pagination> */}
-
-              {/* <ReactPaginate pageCount={5} pageRangeDisplayed={5} marginPagesDisplayed={5} ></ReactPaginate> */}
 
               <ReactPaginate
-                activeClassName={'item active '}
-                breakClassName={'item break-me '}
-                breakLabel={'...'}
-                containerClassName={'pagination'}
-                disabledClassName={'disabled-page'}
-                marginPagesDisplayed={5}
-                nextClassName={"item next "}
-                // nextLabel={<ArrowForwardIosIcon style={{ fontSize: 18, width: 150 }} />}
-                onPageChange={() => null}
-                pageCount={5}
-                pageClassName={'item pagination-page '}
+                breakLabel={"..."}
+                breakClassName={"break-me"}
+                pageCount={pagination.pageCount}
+                marginPagesDisplayed={2}
                 pageRangeDisplayed={5}
-                previousClassName={"item previous"}
-              // previousLabel={<ArrowBackIosIcon style={{ fontSize: 18, width: 150 }} />}
+                onPageChange={handlePageClick}
+                containerClassName={"pagination"}
+                subContainerClassName={"pages pagination"}
+                activeClassName={"active"}
               />
 
             </Tab>
