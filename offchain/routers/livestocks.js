@@ -10,6 +10,34 @@ router.route('/:address').get((req, res) => {
     .catch((err) => res.status(400).json('Error: ' + err));
 });
 
+router.route('/select/:address').get((req, res) => {
+  Livestock.find({ address: req.params.address })
+    .then((livestocks) => res.json(livestocks))
+    .catch((err) => res.status(400).json('Error: ' + err))
+});
+
+router.route('/ls/:id').get((req, res) => {
+  console.log(req.params.id)
+  Livestock.findOne({ id: req.params.id })
+    .then((livestocks) => res.json(livestocks))
+    .catch((err) => res.status(400).json('Error: ' + err))
+});
+
+router.route('/weightRecord/:id').patch((req, res) => {
+  console.log(req.params.id)
+  Livestock.findOne({ id: req.params.id })
+    .then((livestocks) => {
+      livestocks.weight = req.body.weight;
+      livestocks.length = req.body.length;
+      livestocks.heartGrith = req.body.heartGrith;
+
+      livestocks
+        .save()
+        .then(() => res.json('Berat badan hewan telah diubah'))
+        .catch((err) => res.status(400).json('Error: ' + err))
+    })
+});
+
 router.route('/add').post((req, res) => {
   const id = req.body.id;
   const name = req.body.name;

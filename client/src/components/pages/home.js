@@ -9,6 +9,7 @@ import { LscountContext } from '../../context/lscountContext'
 // import { LivestocksContext } from '../../context/livestocks'
 import web3 from 'web3'
 import moment from 'moment'
+import 'moment/locale/id'
 import axios from 'axios'
 import ReactPaginate from 'react-paginate'
 import '../../assets/css/pagination.css'
@@ -63,100 +64,159 @@ export default function Home() {
     heartGrith: 0,
   })
 
-  const [selectHewan, setSelectHewan] = useState({
+  const [selectHewan, setSelectHewan] = useState()
+  const [viewHewan, setViewHewan] = useState({
     weight: 0,
     length: 0,
     heartGrith: 0,
-    id: '',
+    dob: 0,
+    gender: 0,
+    race: 0,
+    id: 0,
   })
 
   const [test, setTest] = useState([]);
 
-  const handleGender = (event) => {
-    event.persist();
-    setTambahHewan((values) => ({
-      ...values,
-      gender: event.target.value,
-    }))
-    // Check state gender
-    // console.log(event.target.value)
+  // const handleGender = (event) => {
+  //   event.persist();
+  //   setTambahHewan((values) => ({
+  //     ...values,
+  //     gender: event.target.value,
+  //   }))
+  //   // Check state gender
+  //   // console.log(event.target.value)
+  // }
+
+  useEffect(() => {
+    console.log(viewHewan)
+  }, [tambahHewan, viewHewan])
+
+  const handleTambahHewan = (e) => {
+    switch (e.target.name) {
+      case 'name':
+        setTambahHewan((values) => ({ ...values, name: e.target.value }));
+        break;
+      case 'earTag':
+        setTambahHewan((values) => ({ ...values, earTag: e.target.value }));
+        break;
+      case 'fatherId':
+        setTambahHewan((values) => ({ ...values, fatherId: e.target.value }));
+        break;
+      case 'motherId':
+        setTambahHewan((values) => ({ ...values, motherId: e.target.value }));
+        break;
+      case 'race':
+        setTambahHewan((values) => ({ ...values, race: e.target.value }));
+        break;
+      case 'gender':
+        setTambahHewan((values) => ({ ...values, gender: e.target.value }));
+        break;
+      case 'weight':
+        setTambahHewan((values) => ({ ...values, weight: e.target.value }));
+        break;
+      case 'length':
+        setTambahHewan((values) => ({ ...values, length: e.target.value }));
+        break;
+      case 'heartGrith':
+        setTambahHewan((values) => ({ ...values, heartGrith: e.target.value }));
+        break;
+      default:
+        break;
+    }
   }
 
-  const handleName = (event) => {
-    event.persist();
-    setTambahHewan((values) => ({
-      ...values,
-      name: event.target.value,
-    }))
+  const handleWeightRecord = (e) => {
+    switch (e.target.name) {
+      case 'weightb':
+        setViewHewan((values) => ({ ...values, weight: e.target.value }));
+        break;
+      case 'lengthb':
+        setViewHewan((values) => ({ ...values, length: e.target.value }));
+        break;
+      case 'heartGrithb':
+        setViewHewan((values) => ({ ...values, heartGrith: e.target.value }));
+        break;
+      default:
+        break;
+    }
   }
 
-  const handleDOB = (event) => {
-    event.persist();
-    setTambahHewan((values) => ({
-      ...values,
-      dob: moment.unix(event.target.value)._i,
-    }))
-  }
+  // const handleDOB = (event) => {
+  //   event.persist();
+  //   setTambahHewan((values) => ({
+  //     ...values,
+  //     dob: moment.unix(event.target.value)._i,
+  //   }))
+  // }
 
-  const handleFather = (event) => {
-    event.persist();
-    setTambahHewan((values) => ({
-      ...values,
-      fatherId: event.target.value,
-    }))
-  }
+  // const handleFather = (event) => {
+  //   event.persist();
+  //   setTambahHewan((values) => ({
+  //     ...values,
+  //     fatherId: event.target.value,
+  //   }))
+  // }
 
-  const handleMother = (event) => {
-    event.persist();
-    setTambahHewan((values) => ({
-      ...values,
-      motherId: event.target.value,
-    }))
-  }
+  // const handleMother = (event) => {
+  //   event.persist();
+  //   setTambahHewan((values) => ({
+  //     ...values,
+  //     motherId: event.target.value,
+  //   }))
+  // }
 
-  const handleEarTag = (event) => {
-    event.persist();
-    setTambahHewan((values) => ({
-      ...values,
-      earTag: event.target.value,
-    }))
-  }
+  // const handleEarTag = (event) => {
+  //   event.persist();
+  //   setTambahHewan((values) => ({
+  //     ...values,
+  //     earTag: event.target.value,
+  //   }))
+  // }
 
-  const handleRace = (event) => {
-    event.persist();
-    setTambahHewan((values) => ({
-      ...values,
-      race: event.target.value,
-    }))
-  }
+  // const handleRace = (event) => {
+  //   event.persist();
+  //   setTambahHewan((values) => ({
+  //     ...values,
+  //     race: event.target.value,
+  //   }))
+  // }
 
-  const handleWeight = (event) => {
-    event.persist();
-    setTambahHewan((values) => ({
-      ...values,
-      weight: event.target.value,
-    }))
-  }
+  // const handleWeight = (event) => {
+  //   event.persist();
+  //   setTambahHewan((values) => ({
+  //     ...values,
+  //     weight: event.target.value,
+  //   }))
+  // }
 
-  const handleLength = (event) => {
-    event.persist();
-    setTambahHewan((values) => ({
-      ...values,
-      length: event.target.value,
-    }))
-  }
+  // const handleLength = (event) => {
+  //   event.persist();
+  //   setTambahHewan((values) => ({
+  //     ...values,
+  //     length: event.target.value,
+  //   }))
+  // }
 
-  const handleHeartGrith = (event) => {
-    event.persist();
-    setTambahHewan((values) => ({
-      ...values,
-      heartGrith: event.target.value,
-    }))
-  }
+  // const handleHeartGrith = (event) => {
+  //   event.persist();
+  //   setTambahHewan((values) => ({
+  //     ...values,
+  //     heartGrith: event.target.value,
+  //   }))
+  // }
 
-  const handleBeratBadan = (event) => {
-    event.persist();
+  const handleBeratBadan = (param) => (e) => {
+    e.persist();
     //KIRIM KE STATE
+    setViewHewan({
+      weight: param.weight,
+      length: param.length,
+      heartGrith: param.heartGrith,
+      id: param.id,
+      gender: param.gender,
+      race: param.race,
+      dob: param.birth,
+    })
   }
 
   const handleKesehatan = (event) => {
@@ -167,6 +227,27 @@ export default function Home() {
       length: 200,
       heartGrith: 300,
     })
+  }
+
+  const handleViewHewan = (param, tab) => (e) => {
+    e.persist()
+
+    setKey(tab)
+
+    setViewHewan({
+      weight: param.weight,
+      length: param.length,
+      heartGrith: param.heartGrith,
+      id: param.id,
+      gender: param.gender,
+      race: param.race,
+      dob: param.birth,
+    })
+
+  }
+
+  const convertMoment = (dob) => {
+    return moment().diff(moment.unix(dob / 1000000), 'days') + ' Hari'
   }
 
   // const getRace = (_lsId) => {
@@ -197,6 +278,21 @@ export default function Home() {
       })
   }
 
+  const addWeightRecord = (_lsId, _weight, _length, _hearthGrith) => {
+    contract.contracts.methods.registerWRecord(_lsId, _weight, _length, _hearthGrith, moment.unix(new Date())._i)
+      .send({ from: contract.accounts[0] })
+      .on('receipt', (receipt) => {
+        axios
+          .patch(`http://localhost:3001/livestocks/weightRecord/${_lsId}`, {
+            weight: _weight,
+            length: _length,
+            heartGrith: _hearthGrith,
+          })
+          .then((res) => console.log(res.data))
+        console.log(receipt)
+      })
+  }
+
   useEffect(() => {
     if (contract.accounts[0]) {
       if (contract.user.role == 0) {
@@ -209,8 +305,8 @@ export default function Home() {
         setJabatan("Error")
       }
 
-      getHewan();
-
+      getHewan()
+      getHewanSelect()
     }
   }, [contract.accounts, pagination.currentPage])
 
@@ -219,6 +315,27 @@ export default function Home() {
     axios
       .get(`http://localhost:3001/livestocks/${contract.accounts}?offset=${pagination.offset}&perPage=${pagination.perPage}`)
       .then((res) => setLivestocks(res.data))
+  }
+
+  const getHewanSelect = () => {
+    axios
+      .get(`http://localhost:3001/livestocks/select/${contract.accounts}`)
+      .then((res) => setSelectHewan(res.data))
+  }
+
+  const getHewanDetail = (id) => {
+    console.log(id)
+    axios
+      .get(`http://localhost:3001/livestocks/ls/${id}`)
+      .then((res) => setViewHewan({
+        weight: res.data.weight,
+        length: res.data.length,
+        heartGrith: res.data.heartGrith,
+        id: res.data.id,
+        gender: res.data.gender,
+        race: res.data.race,
+        dob: res.data.birth,
+      }))
   }
 
   const handlePageClick = (e) => {
@@ -247,7 +364,7 @@ export default function Home() {
                 Nama
               </Form.Label>
               <Col sm="8">
-                <Form.Control type="text" name="name" onChange={handleName} placeholder="Masukkan nama sapi" />
+                <Form.Control type="text" name="name" onChange={(e) => handleTambahHewan(e)} placeholder="Masukkan nama sapi" />
               </Col>
             </Form.Group>
 
@@ -256,7 +373,7 @@ export default function Home() {
                 Eartag
               </Form.Label>
               <Col sm="8">
-                <Form.Control type="text" name="earTag" onChange={handleEarTag} placeholder="Masukkan nomor telinga" />
+                <Form.Control type="text" name="earTag" onChange={(e) => handleTambahHewan(e)} placeholder="Masukkan nomor telinga" />
               </Col>
             </Form.Group>
 
@@ -265,7 +382,7 @@ export default function Home() {
                 Id Bapak
               </Form.Label>
               <Col sm="8">
-                <Form.Control type="number" name="fatherId" onChange={handleFather} placeholder="Masukkan nomor id bapak" />
+                <Form.Control type="number" name="fatherId" onChange={(e) => handleTambahHewan(e)} placeholder="Masukkan nomor id bapak" />
               </Col>
             </Form.Group>
 
@@ -274,7 +391,7 @@ export default function Home() {
                 Id Induk
               </Form.Label>
               <Col sm="8">
-                <Form.Control type="number" name="motherId" onChange={handleMother} placeholder="Masukkan nomor id induk" />
+                <Form.Control type="number" name="motherId" onChange={(e) => handleTambahHewan(e)} placeholder="Masukkan nomor id induk" />
               </Col>
             </Form.Group>
 
@@ -287,7 +404,7 @@ export default function Home() {
                   as="select"
                   placeholder="ras sapi"
                   name="race"
-                  onChange={handleRace}
+                  onChange={(e) => handleTambahHewan(e)}
                 >
                   {ras.item.map(function (ras) {
                     return (
@@ -306,7 +423,7 @@ export default function Home() {
               </Form.Label>
               <Col sm="8">
                 {['radio'].map((type) => (
-                  <div key={`inline-${type}`} onChange={handleGender} value={tambahHewan.gender} className="mb-3">
+                  <div key={`inline-${type}`} onChange={(e) => handleTambahHewan(e)} value={tambahHewan.gender} className="mb-3">
                     <Form.Check
                       inline
                       value={0}
@@ -343,7 +460,7 @@ export default function Home() {
               Berat
             </Form.Label>
             <Col sm="2">
-              <Form.Control type="number" name="weight" onChange={handleWeight} min={0} placeholder="Berat" />
+              <Form.Control type="number" name="weight" onChange={(e) => handleTambahHewan(e)} min={0} placeholder="Berat" />
             </Col>
             <Form.Label column sm="2">
               kg
@@ -354,7 +471,7 @@ export default function Home() {
               Lingkar dada
             </Form.Label>
             <Col sm="2">
-              <Form.Control type="number" min={0} name="heartGrith" onChange={handleHeartGrith} placeholder="Tinggi" />
+              <Form.Control type="number" min={0} name="heartGrith" onChange={(e) => handleTambahHewan(e)} placeholder="Tinggi" />
             </Col>
             <Form.Label column sm="3">
               cm
@@ -365,7 +482,7 @@ export default function Home() {
               Panjang
             </Form.Label>
             <Col sm="2">
-              <Form.Control type="number" min={0} name="length" onChange={handleLength} placeholder="Lebar" />
+              <Form.Control type="number" min={0} name="length" onChange={(e) => handleTambahHewan(e)} placeholder="Lebar" />
             </Col>
             <Form.Label column sm="2">
               cm
@@ -446,8 +563,8 @@ export default function Home() {
                         <td>{item.length}</td>
                         <td>{item.alive ? 'Hidup' : 'Mati'}</td>
                         <td className="text-center">
-                          <Button as="input" className="mr-3" onClick={(e) => { e.preventDefault(); setKey('transfer') }} type="button" value="Transfer" />
-                          <Button as="input" className="mr-3" type="button" value="BB" />
+                          <Button as="input" className="mr-3" onClick={handleViewHewan(item, 'transfer')} type="button" value="Transfer" />
+                          <Button as="input" className="mr-3" onClick={handleViewHewan(item, 'beratBadan')} type="button" value="BB" />
                           <Button as="input" className="mr-3" type="button" value="Kesehatan" />
                           <Button as="input" className="mr-3" type="button" value="Lihat" />
                           <Button as="input" variant="danger" className="mr-3" type="button" value="Mati?" disabled={item.status ? false : true} />
@@ -483,7 +600,7 @@ export default function Home() {
                     id Hewan ternak
                   </Form.Label>
                   <Col sm={4}>
-                    <Form.Control type="text" placeholder="id hewan" />
+                    <Form.Control type="text" placeholder="id hewan" value={viewHewan.id} />
                   </Col>
                 </Form.Group>
 
@@ -492,14 +609,14 @@ export default function Home() {
                     Berat
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Berat" />
+                    <Form.Control plaintext readOnly placeholder="Berat" value={viewHewan.weight} />
                   </Col>
 
                   <Form.Label className="text-right" column sm={2}>
                     Umur
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="umur" />
+                    <Form.Control plaintext readOnly placeholder="umur" value={convertMoment(viewHewan.dob)} />
                   </Col>
                 </Form.Group>
 
@@ -508,14 +625,14 @@ export default function Home() {
                     Lingkar Dada
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Berat" />
+                    <Form.Control plaintext readOnly placeholder="Berat" value={viewHewan.heartGrith} />
                   </Col>
 
                   <Form.Label className="text-right" column sm={2}>
                     Kelamin
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="umur" />
+                    <Form.Control plaintext readOnly placeholder="umur" value={viewHewan.gender ? 'Jantan' : 'Betina'} />
                   </Col>
                 </Form.Group>
 
@@ -524,14 +641,14 @@ export default function Home() {
                     Panjang
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Berat" />
+                    <Form.Control plaintext readOnly placeholder="Berat" value={viewHewan.length} />
                   </Col>
 
                   <Form.Label className="text-right" column sm={2}>
                     Jenis Ras
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="umur" />
+                    <Form.Control plaintext readOnly placeholder="umur" value={ras.item[viewHewan.race].label} />
                   </Col>
                 </Form.Group>
 
@@ -540,7 +657,7 @@ export default function Home() {
                     Address Pengirim
                   </Form.Label>
                   <Col sm={4}>
-                    <Form.Control type="text" placeholder="id hewan" />
+                    <Form.Control type="text" placeholder="id hewan" value={contract.accounts} />
                   </Col>
                 </Form.Group>
 
@@ -658,13 +775,17 @@ export default function Home() {
                   <Col sm="4">
                     <Form.Control
                       as="select"
-                      placeholder="ras sapi"
+                      placeholder="hewan ternak"
                       name="idHewan"
-                      onChange={handleRace}
+                      onChange={(e) => getHewanDetail(e.target.value)}
+                      // onChange={handleBeratBadan}
+                      value={viewHewan.id}
                     >
-                      {/* {livestocks.livestocks.map((item) => livestocks.owner[item.lsId - 1] == contract.accounts[0] && (
-                        <option key={item.lsId}>{web3.utils.hexToUtf8(item.earTag)}</option>
-                      ))} */}
+                      {selectHewan ?
+                        selectHewan.map((item) => {
+                          return (<option value={item.id}>{item.name}</option>)
+                        }) : ''
+                      }
                     </Form.Control>
                   </Col>
                 </Form.Group>
@@ -674,14 +795,14 @@ export default function Home() {
                     Berat
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control type="text" placeholder="Berat" />
+                    <Form.Control type="number" name="weightb" onChange={(e) => handleWeightRecord(e)} placeholder="Berat" value={viewHewan.weight} />
                   </Col>
 
                   <Form.Label className="text-right" column sm={2}>
                     Umur
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="umur" />
+                    <Form.Control plaintext readOnly placeholder="Umur" value={convertMoment(viewHewan.dob)} />
                   </Col>
                 </Form.Group>
 
@@ -690,14 +811,14 @@ export default function Home() {
                     Lingkar Dada
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control type="text" placeholder="Berat" />
+                    <Form.Control type="number" name="heartGrithb" onChange={(e) => handleWeightRecord(e)} placeholder="Lingkar Dada" value={viewHewan.heartGrith} />
                   </Col>
 
                   <Form.Label className="text-right" column sm={2}>
                     Kelamin
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="umur" />
+                    <Form.Control plaintext readOnly placeholder="Kelamin" value={viewHewan.gender ? 'Jantan' : 'Betina'} />
                   </Col>
                 </Form.Group>
 
@@ -706,20 +827,20 @@ export default function Home() {
                     Panjang
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control type="text" placeholder="Berat" />
+                    <Form.Control type="number" name="lengthb" onChange={(e) => handleWeightRecord(e)} placeholder="Panjang" value={viewHewan.length} />
                   </Col>
 
                   <Form.Label className="text-right" column sm={2}>
                     Jenis Ras
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="umur" />
+                    <Form.Control plaintext readOnly placeholder="Ras" value={ras.item[viewHewan.race].label} />
                   </Col>
                 </Form.Group>
 
                 <Form.Group as={Row}>
                   <Col sm={{ span: 7, offset: 2 }}>
-                    <Button className="float-right" type="submit">Kirim</Button>
+                    <Button className="float-right" type="submit" onClick={(e) => { e.preventDefault(); addWeightRecord(viewHewan.id, viewHewan.weight, viewHewan.length, viewHewan.heartGrith) }}>Kirim</Button>
                   </Col>
                 </Form.Group>
               </Form>
@@ -752,7 +873,7 @@ export default function Home() {
                     Berat
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Berat" value={selectHewan.weight} />
+                    <Form.Control plaintext readOnly placeholder="Berat" />
                   </Col>
 
                   <Form.Label className="text-right" column sm={2}>
@@ -768,7 +889,7 @@ export default function Home() {
                     Lingkar Dada
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Berat" value={selectHewan.heartGrith} />
+                    <Form.Control plaintext readOnly placeholder="Berat" />
                   </Col>
 
                   <Form.Label className="text-right" column sm={2}>
@@ -784,7 +905,7 @@ export default function Home() {
                     Panjang
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Berat" value={selectHewan.length} />
+                    <Form.Control plaintext readOnly placeholder="Berat" />
                   </Col>
 
                   <Form.Label className="text-right" column sm={2}>
