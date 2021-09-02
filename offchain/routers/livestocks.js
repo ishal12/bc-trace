@@ -1,5 +1,6 @@
 const router = require('express').Router();
 let Livestock = require("../models/livestock.model");
+let Feed = require("../models/feed.model")
 
 router.route('/:address').get((req, res) => {
   const offset = Number(req.query.offset);
@@ -36,6 +37,40 @@ router.route('/weightRecord/:id').patch((req, res) => {
         .then(() => res.json('Berat badan hewan telah diubah'))
         .catch((err) => res.status(400).json('Error: ' + err))
     })
+});
+
+router.route('/feedRecord/add/:id').post((req, res) => {
+  console.log(req.params.id)
+  // BELOM DIAPA APAIN
+  // const _livestock = req.body._livestock
+  const id = req.params.id
+  const feedType = req.body.feedType
+  const amount = req.body.amount
+  const actor = req.body.actor
+  const _livestock = req.body._livestock
+
+  const newFeed = new Feed({
+    id,
+    _livestock,
+    feedType,
+    amount,
+    actor,
+  })
+  console.log(newFeed)
+  newFeed
+    .save()
+    .then(() => res.json('Pakan telah ditambahkan'))
+    .catch((err) => {
+      res.status(400).json('Error: ' + err)
+    })
+});
+
+router.route('/feedRecord/view/:id').get((req, res) => {
+  console.log(req.params.id)
+  Feed.findOne({ id: req.params.id })
+    .populate('_livestock')
+    .then((feed) => res.json(feed))
+    .catch((err) => res.status(400).json('Error: ' + err));
 });
 
 router.route('/add').post((req, res) => {

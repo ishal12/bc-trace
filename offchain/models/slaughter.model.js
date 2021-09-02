@@ -12,8 +12,8 @@ const slaughterSchema = new Schema(
             type: String,
             required: true,
         },
-        livestock: {
-            type: mongoose.Schema.Types.ObjectId,
+        _livestock: {
+            type: Schema.Types.ObjectId,
             ref: "Livestock",
         },
         age: {

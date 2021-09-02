@@ -8,7 +8,11 @@ const feedSchema = new Schema(
             type: String,
             required: true,
         },
-        foodType: {
+        _livestock: {
+            type: Schema.Types.ObjectId,
+            ref: 'Livestock'
+        },
+        feedType: {
             type: String,
             Enum: ['hijauan', 'konsentrat', 'tambahan', 'vitamin', 'obat'],
             required: true,

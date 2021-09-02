@@ -41,6 +41,16 @@ export default function Home() {
     ]
   })
 
+  const [feed, setFeed] = useState({
+    item: [
+      { enum: 'hijauan', label: 'Hijauan' },
+      { enum: 'konsentrat', label: 'Konsenstrat' },
+      { enum: 'tambahan', label: 'Tambahan' },
+      { enum: 'vitamin', label: 'Vitamin' },
+      { enum: 'obat', label: 'Obat' },
+    ]
+  })
+
   const [race, setRace] = useState()
 
   const [key, setKey] = useState('hewanTernak');
@@ -66,6 +76,7 @@ export default function Home() {
 
   const [selectHewan, setSelectHewan] = useState()
   const [viewHewan, setViewHewan] = useState({
+    _id: '',
     weight: 0,
     length: 0,
     heartGrith: 0,
@@ -76,6 +87,8 @@ export default function Home() {
     sick: false,
     description: '',
     action: '',
+    feedType: 'hijauan',
+    feedAmount: 0,
   })
 
   const [switchSick, setSwitchSick] = useState({
@@ -155,6 +168,19 @@ export default function Home() {
         break;
       case 'description':
         setViewHewan((values) => ({ ...values, description: e.target.value }));
+        break;
+      default:
+        break;
+    }
+  }
+
+  const handleFeed = (e) => {
+    switch (e.target.name) {
+      case 'feedType':
+        setViewHewan((values) => ({ ...values, feedType: e.target.value }));
+        break;
+      case 'feedAmount':
+        setViewHewan((values) => ({ ...values, feedAmount: e.target.value }));
         break;
       default:
         break;
@@ -275,6 +301,7 @@ export default function Home() {
     setKey(tab)
 
     setViewHewan({
+      _id: param._id,
       weight: param.weight,
       length: param.length,
       heartGrith: param.heartGrith,
@@ -282,6 +309,7 @@ export default function Home() {
       gender: param.gender,
       race: param.race,
       dob: param.birth,
+      feedType: 'hijauan',
     })
 
   }
@@ -340,6 +368,18 @@ export default function Home() {
       .on('receipt', (receipt) => {
         console.log(receipt)
       })
+  }
+
+  const addFeedRecord = (_id, _lsId, _feedType, _feedAmount) => {
+    axios
+      .post(`http://localhost:3001/livestocks/feedRecord/add/${_lsId}`, {
+        id: _lsId,
+        _livestock: _id,
+        feedType: _feedType,
+        amount: _feedAmount,
+        actor: contract.accounts[0],
+      })
+      .then((res) => console.log(res.data))
   }
 
   useEffect(() => {
@@ -615,6 +655,7 @@ export default function Home() {
                           <Button as="input" className="mr-3" onClick={handleViewHewan(item, 'transfer')} type="button" value="Transfer" />
                           <Button as="input" className="mr-3" onClick={handleViewHewan(item, 'beratBadan')} type="button" value="BB" />
                           <Button as="input" className="mr-3" onClick={handleViewHewan(item, 'kesehatan')} type="button" value="Kesehatan" />
+                          <Button as="input" className="mr-3" onClick={handleViewHewan(item, 'pangan')} type="button" value="Pangan" />
                           <Button as="input" className="mr-3" type="button" value="Lihat" />
                           <Button as="input" variant="danger" className="mr-3" type="button" value="Mati?" disabled={item.status ? false : true} />
                         </td>
@@ -1005,84 +1046,110 @@ export default function Home() {
             {/* PANGAN */}
             <Tab eventKey="pangan" title="Pangan">
               <Form className="mt-5">
-                <Form.Group as={Row} controlId="formHorizontalEmail">
-                  <Form.Label className="text-right" column sm={4}>
+                <Form.Group as={Row} controlId="formPangan">
+                  <Form.Label column sm="4" className="text-right">
                     id Hewan ternak
                   </Form.Label>
-                  <Col sm={4}>
-                    <Form.Control type="text" placeholder="id hewan" />
+                  <Col sm="4">
+                    <Form.Control
+                      as="select"
+                      placeholder="hewan ternak"
+                      name="idHewan"
+                      onChange={(e) => getHewanDetail(e.target.value)}
+                      // onChange={handleBeratBadan}
+                      value={viewHewan.id}
+                    >
+                      {selectHewan ?
+                        selectHewan.map((item) => {
+                          return (<option value={item.id}>{item.name} - {item.earTag}</option>)
+                        }) : ''
+                      }
+                    </Form.Control>
                   </Col>
                 </Form.Group>
 
-                <Form.Group as={Row} controlId="formHorizontalPassword">
+                <Form.Group as={Row} controlId="formPangan">
                   <Form.Label className="text-right" column sm={4}>
                     Berat
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Berat" />
+                    <Form.Control plaintext readOnly name="weight" placeholder="Berat" value={viewHewan.weight} />
                   </Col>
 
                   <Form.Label className="text-right" column sm={2}>
                     Umur
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="umur" />
+                    <Form.Control plaintext readOnly name="dob" placeholder="Umur" value={convertMoment(viewHewan.dob)} />
                   </Col>
                 </Form.Group>
 
-                <Form.Group as={Row} controlId="formHorizontalPassword">
+                <Form.Group as={Row} controlId="formPangan">
                   <Form.Label className="text-right" column sm={4}>
                     Lingkar Dada
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Berat" />
+                    <Form.Control plaintext readOnly name="heartGrith" placeholder="Berat" value={viewHewan.heartGrith} />
                   </Col>
 
                   <Form.Label className="text-right" column sm={2}>
                     Kelamin
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="umur" />
+                    <Form.Control plaintext readOnly name="gender" placeholder="Kelamin" value={viewHewan.gender ? 'Jantan' : 'Betina'} />
                   </Col>
                 </Form.Group>
 
-                <Form.Group as={Row} controlId="formHorizontalPassword">
+                <Form.Group as={Row} controlId="formPangan">
                   <Form.Label className="text-right" column sm={4}>
                     Panjang
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Berat" />
+                    <Form.Control plaintext readOnly name="length" placeholder="Panjang" value={viewHewan.length} />
                   </Col>
 
                   <Form.Label className="text-right" column sm={2}>
                     Jenis Ras
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="umur" />
+                    <Form.Control plaintext readOnly name="race" placeholder="Ras" value={ras.item[viewHewan.race].label} />
                   </Col>
                 </Form.Group>
 
-                <Form.Group as={Row} controlId="formHorizontalEmail">
-                  <Form.Label className="text-right" column sm={4}>
+                <Form.Group as={Row} controlId="formPangan">
+                  <Form.Label column sm="4" className="text-right">
                     Jenis Pangan
                   </Form.Label>
-                  <Col sm={4}>
-                    <Form.Control type="text" placeholder="id hewan" />
+                  <Col sm="4">
+                    <Form.Control
+                      as="select"
+                      placeholder="hewan ternak"
+                      name="feedType"
+                      onChange={(e) => handleFeed(e)}
+                      // onChange={handleBeratBadan}
+                      value={viewHewan.feedType}
+                    >
+                      {feed.item ?
+                        feed.item.map((item) => {
+                          return (<option value={item.enum}>{item.label}</option>)
+                        }) : ''
+                      }
+                    </Form.Control>
                   </Col>
                 </Form.Group>
 
-                <Form.Group as={Row} controlId="formHorizontalEmail">
+                <Form.Group as={Row} controlId="formPangan">
                   <Form.Label className="text-right" column sm={4}>
                     Jumlah Pangan
                   </Form.Label>
-                  <Col sm={1}>
-                    <Form.Control type="number" placeholder="id hewan" />
+                  <Col sm={2}>
+                    <Form.Control type="number" name="feedAmount" onChange={(e) => handleFeed(e)} placeholder="" value={viewHewan.feedAmount} />
                   </Col>
                 </Form.Group>
 
                 <Form.Group as={Row}>
                   <Col sm={{ span: 7, offset: 2 }}>
-                    <Button className="float-right" type="submit">Kirim</Button>
+                    <Button className="float-right" type="submit" onClick={(e) => { e.preventDefault(); addFeedRecord(viewHewan._id, viewHewan.id, viewHewan.feedType, viewHewan.feedAmount) }}>Kirim</Button>
                   </Col>
                 </Form.Group>
               </Form>
