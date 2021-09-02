@@ -13,6 +13,10 @@ const livestockSchema = new Schema(
             type: String,
             required: true,
         },
+        earTag: {
+            type: String,
+            required: true,
+        },
         gender: {
             type: Boolean,
             required: true,

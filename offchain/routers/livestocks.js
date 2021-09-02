@@ -41,6 +41,7 @@ router.route('/weightRecord/:id').patch((req, res) => {
 router.route('/add').post((req, res) => {
   const id = req.body.id;
   const name = req.body.name;
+  const earTag = req.body.earTag;
   const weight = Number(req.body.weight);
   const length = Number(req.body.length);
   const heartGrith = Number(req.body.heartGrith);
@@ -55,6 +56,7 @@ router.route('/add').post((req, res) => {
   const newLS = new Livestock({
     id,
     name,
+    earTag,
     weight,
     length,
     heartGrith,

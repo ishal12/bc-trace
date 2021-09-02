@@ -73,9 +73,16 @@ export default function Home() {
     gender: 0,
     race: 0,
     id: 0,
+    sick: false,
+    description: '',
+    action: '',
   })
 
-  const [test, setTest] = useState([]);
+  const [switchSick, setSwitchSick] = useState({
+    label: 'Sehat',
+    sick: false,
+    disabled: 'true',
+  });
 
   // const handleGender = (event) => {
   //   event.persist();
@@ -89,7 +96,7 @@ export default function Home() {
 
   useEffect(() => {
     console.log(viewHewan)
-  }, [tambahHewan, viewHewan])
+  }, [tambahHewan, viewHewan, switchSick])
 
   const handleTambahHewan = (e) => {
     switch (e.target.name) {
@@ -138,6 +145,39 @@ export default function Home() {
         break;
       default:
         break;
+    }
+  }
+
+  const handleHealthRecord = (e) => {
+    switch (e.target.name) {
+      case 'action':
+        setViewHewan((values) => ({ ...values, action: e.target.value }));
+        break;
+      case 'description':
+        setViewHewan((values) => ({ ...values, description: e.target.value }));
+        break;
+      default:
+        break;
+    }
+  }
+
+  const handleSwitchSick = (e) => {
+    e.persist()
+
+    if (e.target.checked) {
+      setSwitchSick({
+        label: 'Sakit',
+        sick: true,
+        disabled: false,
+      })
+      setViewHewan((values) => ({ ...values, sick: true }))
+    } else {
+      setSwitchSick({
+        label: 'Sehat',
+        sick: false,
+        disabled: true,
+      })
+      setViewHewan((values) => ({ ...values, sick: false, description: '' }))
     }
   }
 
@@ -265,6 +305,7 @@ export default function Home() {
           .post('http://localhost:3001/livestocks/add', {
             id: parseInt(livestockCounts) + 1,
             name: _name,
+            earTag: _eartag,
             weight: _weight,
             length: _length,
             heartGrith: _hearthGrith,
@@ -289,6 +330,14 @@ export default function Home() {
             heartGrith: _hearthGrith,
           })
           .then((res) => console.log(res.data))
+        console.log(receipt)
+      })
+  }
+
+  const addHealthRecord = (_lsId, _description, _action, _sick) => {
+    contract.contracts.methods.registerHRecord(_lsId, _description, _action, moment.unix(new Date())._i, _sick)
+      .send({ from: contract.accounts[0] })
+      .on('receipt', (receipt) => {
         console.log(receipt)
       })
   }
@@ -565,7 +614,7 @@ export default function Home() {
                         <td className="text-center">
                           <Button as="input" className="mr-3" onClick={handleViewHewan(item, 'transfer')} type="button" value="Transfer" />
                           <Button as="input" className="mr-3" onClick={handleViewHewan(item, 'beratBadan')} type="button" value="BB" />
-                          <Button as="input" className="mr-3" type="button" value="Kesehatan" />
+                          <Button as="input" className="mr-3" onClick={handleViewHewan(item, 'kesehatan')} type="button" value="Kesehatan" />
                           <Button as="input" className="mr-3" type="button" value="Lihat" />
                           <Button as="input" variant="danger" className="mr-3" type="button" value="Mati?" disabled={item.status ? false : true} />
                         </td>
@@ -783,7 +832,7 @@ export default function Home() {
                     >
                       {selectHewan ?
                         selectHewan.map((item) => {
-                          return (<option value={item.id}>{item.name}</option>)
+                          return (<option value={item.id}>{item.name} - {item.earTag}</option>)
                         }) : ''
                       }
                     </Form.Control>
@@ -856,14 +905,17 @@ export default function Home() {
                   <Col sm="4">
                     <Form.Control
                       as="select"
-                      placeholder="ras sapi"
+                      placeholder="hewan ternak"
                       name="idHewan"
-                      onChange={handleKesehatan}
+                      onChange={(e) => getHewanDetail(e.target.value)}
+                      // onChange={handleBeratBadan}
+                      value={viewHewan.id}
                     >
-                      <option hidden>Pilih id hewan</option>
-                      {/* {livestocks.livestocks.map((item) => livestocks.owner[item.lsId - 1] == contract.accounts[0] && (
-                        <option key={item.lsId}>{web3.utils.hexToUtf8(item.earTag)}</option>
-                      ))} */}
+                      {selectHewan ?
+                        selectHewan.map((item) => {
+                          return (<option value={item.id}>{item.name} - {item.earTag}</option>)
+                        }) : ''
+                      }
                     </Form.Control>
                   </Col>
                 </Form.Group>
@@ -873,14 +925,14 @@ export default function Home() {
                     Berat
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Berat" />
+                    <Form.Control plaintext readOnly placeholder="Berat" value={viewHewan.weight} />
                   </Col>
 
                   <Form.Label className="text-right" column sm={2}>
                     Umur
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="umur" />
+                    <Form.Control plaintext readOnly placeholder="Umur" value={convertMoment(viewHewan.dob)} />
                   </Col>
                 </Form.Group>
 
@@ -889,14 +941,14 @@ export default function Home() {
                     Lingkar Dada
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Berat" />
+                    <Form.Control plaintext readOnly placeholder="Lingkar dada" value={viewHewan.heartGrith} />
                   </Col>
 
                   <Form.Label className="text-right" column sm={2}>
                     Kelamin
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="umur" />
+                    <Form.Control plaintext readOnly placeholder="Kelamin" value={viewHewan.gender ? 'Jantan' : 'Betina'} />
                   </Col>
                 </Form.Group>
 
@@ -905,14 +957,14 @@ export default function Home() {
                     Panjang
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Berat" />
+                    <Form.Control plaintext readOnly placeholder="Panjang" value={viewHewan.length} />
                   </Col>
 
                   <Form.Label className="text-right" column sm={2}>
                     Jenis Ras
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="umur" />
+                    <Form.Control plaintext readOnly placeholder="Ras" value={ras.item[viewHewan.race].label} />
                   </Col>
                 </Form.Group>
 
@@ -921,8 +973,16 @@ export default function Home() {
                     Nama Penyakit
                   </Form.Label>
                   <Col sm={4}>
-                    <Form.Control type="text" placeholder="id hewan" />
+                    <Form.Control type="text" name="description" onChange={(e) => { handleHealthRecord(e) }} placeholder="Nama Penyakit" disabled={switchSick.disabled} value={viewHewan.description} />
                   </Col>
+
+                  <Form.Check
+                    type="switch"
+                    id="custom-switch"
+                    label={switchSick.label}
+                    checked={switchSick.sick}
+                    onClick={(e) => handleSwitchSick(e)}
+                  />
                 </Form.Group>
 
                 <Form.Group as={Row} controlId="formKesehatan">
@@ -930,13 +990,13 @@ export default function Home() {
                     Aksi
                   </Form.Label>
                   <Col sm={4}>
-                    <Form.Control as="textarea" rows={3} placeholder="id hewan" />
+                    <Form.Control as="textarea" name="action" onChange={(e) => { handleHealthRecord(e) }} rows={3} placeholder="Deskripsikan yang dilakukan" />
                   </Col>
                 </Form.Group>
 
                 <Form.Group as={Row}>
                   <Col sm={{ span: 7, offset: 2 }}>
-                    <Button className="float-right" type="submit">Kirim</Button>
+                    <Button className="float-right" onClick={(e) => { e.preventDefault(); addHealthRecord(viewHewan.id, viewHewan.description, viewHewan.action, viewHewan.sick) }} type="submit">Kirim</Button>
                   </Col>
                 </Form.Group>
               </Form>
