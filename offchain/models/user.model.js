@@ -22,6 +22,9 @@ const userSchema = new Schema(
             type: Number,
             enum: [0, 1, 2],
             required: true,
+        },
+        txHash: {
+            type: String,
         }
     },
     {

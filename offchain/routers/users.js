@@ -12,6 +12,7 @@ router.route('/add').post((req, res) => {
   const name = req.body.name;
   const role = Number(req.body.role);
   const status = Number(2);
+  const txHash = req.body.txHash;
 
   // res.json(address + ' a ' + name + ' b ' + role)
 
@@ -20,6 +21,7 @@ router.route('/add').post((req, res) => {
     name,
     role,
     status,
+    txHash,
   });
 
   newUser
@@ -31,6 +33,7 @@ router.route('/add').post((req, res) => {
 router.route('/activate/:address').patch((req, res) => {
   User.findOne({ address: req.params.address }).then((user) => {
     user.status = Number(1);
+    user.txHash = req.body.txHash;
 
     user
       .save()

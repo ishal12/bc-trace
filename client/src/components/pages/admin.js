@@ -21,9 +21,14 @@ export default function Admin() {
       .on('receipt', (receipt) => {
         setLoading(false)
         axios
-          .patch('http://localhost:3001/users/activate/' + address)
-          .then((res) => console.log(res.data))
-        window.location.reload();
+          .patch(`http://localhost:3001/users/activate/${address}`, {
+            txHash: receipt.transactionHash
+          })
+          .then((res) => {
+            console.log(res.data)
+            window.location.reload()
+          })
+
       });
   }
 
@@ -31,8 +36,6 @@ export default function Admin() {
     axios
       .get('http://localhost:3001/users/')
       .then((res) => setUsers(res.data))
-    // const result = await axios('http://localhost:3001/users/')
-    // setUsers(result.data)
   }, [])
   return (
     <>
