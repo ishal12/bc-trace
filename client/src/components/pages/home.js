@@ -55,6 +55,8 @@ export default function Home() {
 
   const [key, setKey] = useState('hewanTernak');
 
+  const [addressTo, setAddressTo] = useState('');
+
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -109,7 +111,7 @@ export default function Home() {
 
   useEffect(() => {
     console.log(viewHewan)
-  }, [tambahHewan, viewHewan, switchSick])
+  }, [tambahHewan, viewHewan, switchSick, addressTo])
 
   const handleTambahHewan = (e) => {
     switch (e.target.name) {
@@ -205,6 +207,12 @@ export default function Home() {
       })
       setViewHewan((values) => ({ ...values, sick: false, description: '' }))
     }
+  }
+
+  const handleAddressTo = (e) => {
+    e.persist()
+
+    setAddressTo(e.target.value)
   }
 
   // const handleDOB = (event) => {
@@ -380,6 +388,19 @@ export default function Home() {
         actor: contract.accounts[0],
       })
       .then((res) => console.log(res.data))
+  }
+
+  const transferLivestock = (_id, _from, _to) => {
+    contract.contracts.methods.transfer(_id, _from, _to)
+      .send({ from: contract.accounts[0] })
+      .on('receipt', (receipt) => {
+        axios
+          .patch(`http://localhost:3001/livestocks/transfer/${_id}`, {
+            addressTo: _to,
+          })
+          .then((res) => console.log(res.data))
+        console.log(receipt)
+      })
   }
 
   useEffect(() => {
@@ -685,16 +706,29 @@ export default function Home() {
             {/* TRANSFER */}
             <Tab eventKey="transfer" title="Transfer">
               <Form className="mt-5">
-                <Form.Group as={Row} controlId="formHorizontalEmail">
-                  <Form.Label className="text-right" column sm={4}>
+                <Form.Group as={Row} controlId="formTransfer">
+                  <Form.Label column sm="4" className="text-right">
                     id Hewan ternak
                   </Form.Label>
-                  <Col sm={4}>
-                    <Form.Control type="text" placeholder="id hewan" value={viewHewan.id} />
+                  <Col sm="4">
+                    <Form.Control
+                      as="select"
+                      placeholder="hewan ternak"
+                      name="idHewan"
+                      onChange={(e) => getHewanDetail(e.target.value)}
+                      // onChange={handleBeratBadan}
+                      value={viewHewan.id}
+                    >
+                      {selectHewan ?
+                        selectHewan.map((item) => {
+                          return (<option value={item.id}>{item.name} - {item.earTag}</option>)
+                        }) : ''
+                      }
+                    </Form.Control>
                   </Col>
                 </Form.Group>
 
-                <Form.Group as={Row} controlId="formHorizontalPassword">
+                <Form.Group as={Row} controlId="formTransfer">
                   <Form.Label className="text-right" column sm={4}>
                     Berat
                   </Form.Label>
@@ -706,63 +740,63 @@ export default function Home() {
                     Umur
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="umur" value={convertMoment(viewHewan.dob)} />
+                    <Form.Control plaintext readOnly placeholder="Umur" value={convertMoment(viewHewan.dob)} />
                   </Col>
                 </Form.Group>
 
-                <Form.Group as={Row} controlId="formHorizontalPassword">
+                <Form.Group as={Row} controlId="formTransfer">
                   <Form.Label className="text-right" column sm={4}>
                     Lingkar Dada
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Berat" value={viewHewan.heartGrith} />
+                    <Form.Control plaintext readOnly placeholder="Lingkar Dada" value={viewHewan.heartGrith} />
                   </Col>
 
                   <Form.Label className="text-right" column sm={2}>
                     Kelamin
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="umur" value={viewHewan.gender ? 'Jantan' : 'Betina'} />
+                    <Form.Control plaintext readOnly placeholder="Kelamin" value={viewHewan.gender ? 'Jantan' : 'Betina'} />
                   </Col>
                 </Form.Group>
 
-                <Form.Group as={Row} controlId="formHorizontalPassword">
+                <Form.Group as={Row} controlId="formTransfer">
                   <Form.Label className="text-right" column sm={4}>
                     Panjang
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Berat" value={viewHewan.length} />
+                    <Form.Control plaintext readOnly placeholder="Panjang" value={viewHewan.length} />
                   </Col>
 
                   <Form.Label className="text-right" column sm={2}>
                     Jenis Ras
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="umur" value={ras.item[viewHewan.race].label} />
+                    <Form.Control plaintext readOnly placeholder="Ras" value={ras.item[viewHewan.race].label} />
                   </Col>
                 </Form.Group>
 
-                <Form.Group as={Row} controlId="formHorizontalEmail">
+                <Form.Group as={Row} controlId="formTransfer">
                   <Form.Label className="text-right" column sm={4}>
                     Address Pengirim
                   </Form.Label>
                   <Col sm={4}>
-                    <Form.Control type="text" placeholder="id hewan" value={contract.accounts} />
+                    <Form.Control type="text" name="from" readOnly placeholder="Address Pengirim" value={contract.accounts} />
                   </Col>
                 </Form.Group>
 
-                <Form.Group as={Row} controlId="formHorizontalEmail">
+                <Form.Group as={Row} controlId="formTransfer">
                   <Form.Label className="text-right" column sm={4}>
                     Address Penerima
                   </Form.Label>
                   <Col sm={4}>
-                    <Form.Control type="text" placeholder="id hewan" />
+                    <Form.Control type="text" name="to" placeholder="Address Penerima" onChange={(e) => handleAddressTo(e)} />
                   </Col>
                 </Form.Group>
 
                 <Form.Group as={Row}>
                   <Col sm={{ span: 7, offset: 2 }}>
-                    <Button className="float-right" type="submit">Kirim</Button>
+                    <Button className="float-right" onClick={(e) => { e.preventDefault(); transferLivestock(viewHewan.id, contract.accounts[0], addressTo) }} type="submit">Kirim</Button>
                   </Col>
                 </Form.Group>
               </Form>

@@ -498,6 +498,11 @@ contract LivestockManager is UserManager {
         Cowshed storage _cowshed = cowsheds[_from];
         _ls = _cowshed.lsId;
     }
+    
+    function excludeRPH(address _address) internal view {
+        User storage _user = users[_address];
+        require(_user.role != Role(2), "Alamat salah.");
+    }
 
     function transfer(
         uint256 _id,
@@ -525,6 +530,9 @@ contract LivestockManager is UserManager {
         // Deklarasi _remove untuk peternakan yang ingin dikurangi hewan ternaknya.
         Cowshed storage _remove = cowsheds[_from];
         require(_remove.status, "Tidak ada kandang");
+        
+        // Alamat yang dituju tidak boleh alamat RPH
+        excludeRPH(_to);
 
         // Tambah hewan ternak pada address yang dituju.
 

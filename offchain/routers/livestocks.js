@@ -73,6 +73,19 @@ router.route('/feedRecord/view/:id').get((req, res) => {
     .catch((err) => res.status(400).json('Error: ' + err));
 });
 
+router.route('/transfer/:id').patch((req, res) => {
+  console.log(req.params.id)
+  Livestock.findOne({ id: req.params.id })
+    .then((livestocks) => {
+      livestocks.address = req.body.addressTo;
+
+      livestocks
+        .save()
+        .then(() => res.json('Kepemilikan berhasil dipindahkan'))
+        .catch((err) => res.status(400).json('Error: ' + err))
+    })
+});
+
 router.route('/add').post((req, res) => {
   const id = req.body.id;
   const name = req.body.name;
