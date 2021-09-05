@@ -69,7 +69,18 @@ function App() {
   // daftarUser(address, nama, role){
   //   contracts.methods.registerUser(address, nama, role).send({from: accounts}).once('receipt', (receipt));
   // }
-
+  const getData = async (i, instance) => {
+    const livestockRace = await instance.methods.livestockRace(i).call();
+    const livestock = await instance.methods.livestocks(i).call();
+    const lastWR = await instance.methods.getLastWR(i + 1).call();
+    const lsOwner = await instance.methods.livestockOwner(i).call();
+    return {
+      livestockRace,
+      livestock,
+      lastWR,
+      lsOwner
+    };
+  }
 
 
   const blockchain = async () => {
@@ -148,59 +159,54 @@ function App() {
       // }
       // let sapi = [];
 
-      const ls = []
-      const rs = []
-      const wg = []
-      const lg = []
-      const hg = []
-      const ow = []
-
-
-      var prom = [];
-      const nomor = [0, 1, 2];
-      nomor.forEach(n => {
-        prom.push(new Promise(resolve => instance.methods.livestockRace(n).call()))
-      })
-
-      Promise.all(prom).then((value) => {
-        ls.push(value)
-      })
-      console.log(ls)
+      // Dimasukan ke contract??
+      var ls = []; //Livestock
+      var rs = []; //race
+      var wg = []; //weught
+      var lg = []; //length
+      var hg = []; //heartGrith
+      var ow = []; //owner
+      var promises = [];
 
       for (var i = 0; i < globalLS; i++) {
-        const livestockRace = await instance.methods.livestockRace(i).call();
-        rs.push(livestockRace);
-        const livestock = await instance.methods.livestocks(i).call();
-        ls.push(livestock);
-        const lastWR = await instance.methods.getLastWR(i + 1).call();
-        wg.push(lastWR._weight);
-        lg.push(lastWR._length);
-        hg.push(lastWR._heartGrith);
-        const lsOwner = await instance.methods.livestockOwner(i).call();
-        ow.push(lsOwner);
-
-        // sapi.push({
-        //   race: livestockRace,
-        //   livestocks: livestock,
-        //   weight: lastWR._weight,
-        //   length: lastWR._length,
-        //   heartGrith: lastWR._heartGrith,
-        //   owner: lsOwner,
-        // });
-
-
-
-        // setLivestocks((values) => ({
-        //   ...values,
-        //   livestocks: [...values.livestocks, livestock],
-        //   race: [...values.race, livestockRace],
-        //   weight: [...values.weight, lastWR._weight],
-        //   length: [...values.length, lastWR._length],
-        //   heartGrith: [...values.heartGrith, lastWR._heartGrith],
-        //   owner: [...values.owner, lsOwner],
-        // }))
-        // console.log("livestocks: ", livestocks)
+        promises.push(Promise.resolve(getData(i, instance)));
       }
+      Promise.all(promises)
+        .then((result) => {
+          result.forEach(n => {
+            ls.push(n.livestock);
+            rs.push(n.livestockRace);
+            wg.push(n.lastWR._weight);
+            lg.push(n.lastWR._length);
+            hg.push(n.lastWR._heartGrith);
+            ow.push(n.lsOwner);
+          })
+        })
+        .then(() => {
+          console.log({ ls, rs, wg, lg, hg, ow });
+        });
+      // sapi.push({
+      //   race: livestockRace,
+      //   livestocks: livestock,
+      //   weight: lastWR._weight,
+      //   length: lastWR._length,
+      //   heartGrith: lastWR._heartGrith,
+      //   owner: lsOwner,
+      // });
+
+
+
+      // setLivestocks((values) => ({
+      //   ...values,
+      //   livestocks: [...values.livestocks, livestock],
+      //   race: [...values.race, livestockRace],
+      //   weight: [...values.weight, lastWR._weight],
+      //   length: [...values.length, lastWR._length],
+      //   heartGrith: [...values.heartGrith, lastWR._heartGrith],
+      //   owner: [...values.owner, lsOwner],
+      // }))
+      // console.log("livestocks: ", livestocks)
+      //}
 
       a.admin = adminAcc;
       a.isAdmin = checkAdmin;
@@ -231,13 +237,13 @@ function App() {
       //   ...values,
       //   livestock: {
       //     livestocks: [...values.livestocks, ls],
-      //     race: [...values.race, rs],
-      //     weight: [...values.weight, wg],
-      //     length: [...values.length, lg],
-      //     heartGrith: [...values.heartGrith, hg],
-      //     owner: [...values.owner, ow],
-      //   }
-      // }));
+      //     race: [...values.race, rs],1
+      //     weight: [...values.weight, wg],1
+      //     length: [...values.length, lg],1
+      //     heartGrith: [...values.heartGrith, hg],1
+      //     owner: [...values.owner, ow],1
+      //   }1
+      // }));1
 
       console.log({
         x: a
@@ -250,8 +256,10 @@ function App() {
   }
 
   useEffect(() => {
-    blockchain();
-    console.log({ a: contract })
+    if (contract) {
+      blockchain();
+      console.log({ a: contract })
+    }
   }, [])
 
   return (
