@@ -403,6 +403,22 @@ export default function Home() {
       })
   }
 
+  const registerBeef = (_id, _lsId, _to, _age) => {
+    contract.contracts.methods.registerBeef(_lsId, _to)
+      .send({ from: contract.accounts[0] })
+      .on('receipt', (receipt) => {
+        axios
+          .post(`http://localhost:3001/slaughters/add/`, {
+            addressTo: _to,
+            id: _lsId,
+            _livestock: _id,
+            age: moment().diff(moment.unix(_age / 1000000), 'days'),
+          })
+          .then((res) => console.log(res.data))
+        console.log(receipt)
+      })
+  }
+
   useEffect(() => {
     if (contract.accounts[0]) {
       if (contract.user.role == 0) {
@@ -417,6 +433,7 @@ export default function Home() {
 
       getHewan()
       getHewanSelect()
+      console.log('livestock', contract.contracts.methods.livestocks(0).call())
     }
   }, [contract.accounts, pagination.currentPage])
 
@@ -719,6 +736,7 @@ export default function Home() {
                       // onChange={handleBeratBadan}
                       value={viewHewan.id}
                     >
+                      <option hidden>Pilih Hewan</option>
                       {selectHewan ?
                         selectHewan.map((item) => {
                           return (<option value={item.id}>{item.name} - {item.earTag}</option>)
@@ -805,84 +823,98 @@ export default function Home() {
             {/* PROSES DAGING */}
             <Tab eventKey="prosesDaging" title="Proses Daging">
               <Form className="mt-5">
-                <Form.Group as={Row} controlId="formHorizontalEmail">
-                  <Form.Label className="text-right" column sm={4}>
+                <Form.Group as={Row} controlId="formDaging">
+                  <Form.Label column sm="4" className="text-right">
                     id Hewan ternak
                   </Form.Label>
-                  <Col sm={4}>
-                    <Form.Control type="text" placeholder="id hewan" />
+                  <Col sm="4">
+                    <Form.Control
+                      as="select"
+                      placeholder="hewan ternak"
+                      name="idHewan"
+                      onChange={(e) => getHewanDetail(e.target.value)}
+                      // onChange={handleBeratBadan}
+                      value={viewHewan.id}
+                    >
+                      <option hidden>Pilih Hewan</option>
+                      {selectHewan ?
+                        selectHewan.map((item) => {
+                          return (<option value={item.id}>{item.name} - {item.earTag}</option>)
+                        }) : ''
+                      }
+                    </Form.Control>
                   </Col>
                 </Form.Group>
 
-                <Form.Group as={Row} controlId="formHorizontalPassword">
+                <Form.Group as={Row} controlId="formDaging">
                   <Form.Label className="text-right" column sm={4}>
                     Berat
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Berat" />
+                    <Form.Control plaintext readOnly placeholder="Berat" value={viewHewan.weight} />
                   </Col>
 
                   <Form.Label className="text-right" column sm={2}>
                     Umur
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="umur" />
+                    <Form.Control plaintext readOnly placeholder="Umur" value={convertMoment(viewHewan.dob)} />
                   </Col>
                 </Form.Group>
 
-                <Form.Group as={Row} controlId="formHorizontalPassword">
+                <Form.Group as={Row} controlId="formDaging">
                   <Form.Label className="text-right" column sm={4}>
                     Lingkar Dada
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Berat" />
+                    <Form.Control plaintext readOnly placeholder="Lingkar Dada" value={viewHewan.heartGrith} />
                   </Col>
 
                   <Form.Label className="text-right" column sm={2}>
                     Kelamin
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="umur" />
+                    <Form.Control plaintext readOnly placeholder="Kelamin" value={viewHewan.gender ? 'Jantan' : 'Betina'} />
                   </Col>
                 </Form.Group>
 
-                <Form.Group as={Row} controlId="formHorizontalPassword">
+                <Form.Group as={Row} controlId="formDaging">
                   <Form.Label className="text-right" column sm={4}>
                     Panjang
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Berat" />
+                    <Form.Control plaintext readOnly placeholder="Panjang" value={viewHewan.length} />
                   </Col>
 
                   <Form.Label className="text-right" column sm={2}>
                     Jenis Ras
                   </Form.Label>
                   <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="umur" />
+                    <Form.Control plaintext readOnly placeholder="Ras" value={ras.item[viewHewan.race].label} />
                   </Col>
                 </Form.Group>
 
-                <Form.Group as={Row} controlId="formHorizontalEmail">
+                <Form.Group as={Row} controlId="formDaging">
                   <Form.Label className="text-right" column sm={4}>
                     Address Pengirim
                   </Form.Label>
                   <Col sm={4}>
-                    <Form.Control type="text" placeholder="id hewan" />
+                    <Form.Control type="text" readOnly placeholder="Address Pengirim" value={contract.accounts[0]} />
                   </Col>
                 </Form.Group>
 
-                <Form.Group as={Row} controlId="formHorizontalEmail">
+                <Form.Group as={Row} controlId="formDaging">
                   <Form.Label className="text-right" column sm={4}>
                     Address RPH
                   </Form.Label>
                   <Col sm={4}>
-                    <Form.Control type="text" placeholder="id hewan" />
+                    <Form.Control type="text" placeholder="Address RPH" onChange={(e) => handleAddressTo(e)} />
                   </Col>
                 </Form.Group>
 
                 <Form.Group as={Row}>
                   <Col sm={{ span: 7, offset: 2 }}>
-                    <Button className="float-right" type="submit">Kirim</Button>
+                    <Button className="float-right" type="submit" onClick={(e) => { e.preventDefault(); registerBeef(viewHewan._id, viewHewan.id, addressTo, viewHewan.dob) }}>Kirim</Button>
                   </Col>
                 </Form.Group>
               </Form>
@@ -905,6 +937,7 @@ export default function Home() {
                       // onChange={handleBeratBadan}
                       value={viewHewan.id}
                     >
+                      <option hidden>Pilih Hewan</option>
                       {selectHewan ?
                         selectHewan.map((item) => {
                           return (<option value={item.id}>{item.name} - {item.earTag}</option>)
@@ -986,6 +1019,7 @@ export default function Home() {
                       // onChange={handleBeratBadan}
                       value={viewHewan.id}
                     >
+                      <option hidden>Pilih Hewan</option>
                       {selectHewan ?
                         selectHewan.map((item) => {
                           return (<option value={item.id}>{item.name} - {item.earTag}</option>)
@@ -1093,6 +1127,7 @@ export default function Home() {
                       // onChange={handleBeratBadan}
                       value={viewHewan.id}
                     >
+                      <option hidden>Pilih Hewan</option>
                       {selectHewan ?
                         selectHewan.map((item) => {
                           return (<option value={item.id}>{item.name} - {item.earTag}</option>)

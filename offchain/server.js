@@ -20,9 +20,11 @@ connection.once('open', () => {
 /** Router */
 const usersRouter = require('./routers/users');
 const livestocksRouter = require('./routers/livestocks');
+const slaughtersRouter = require('./routers/slaughters');
 
 app.use('/users', usersRouter);
 app.use('/livestocks', livestocksRouter);
+app.use('/slaughters', slaughtersRouter);
 
 app.listen(port, () => {
     console.log(`Server is running on port: ${port} `);
