@@ -66,17 +66,17 @@ contract UserManager {
         return (_address == admin) ? true : false;
     }
 
-    modifier onlyFarmer {
+    modifier onlyFarmer() {
         require(getRole(msg.sender) == 0, "not farmer");
         _;
     }
 
-    modifier onlyStocker {
+    modifier onlyStocker() {
         require(getRole(msg.sender) == 1, "not stocker");
         _;
     }
 
-    modifier onlyButcher {
+    modifier onlyButcher() {
         require(getRole(msg.sender) == 2, "not butcher");
         _;
     }
@@ -498,7 +498,7 @@ contract LivestockManager is UserManager {
         Cowshed storage _cowshed = cowsheds[_from];
         _ls = _cowshed.lsId;
     }
-    
+
     function excludeRPH(address _address) internal view {
         User storage _user = users[_address];
         require(_user.role != Role(2), "Alamat salah.");
@@ -530,7 +530,7 @@ contract LivestockManager is UserManager {
         // Deklarasi _remove untuk peternakan yang ingin dikurangi hewan ternaknya.
         Cowshed storage _remove = cowsheds[_from];
         require(_remove.status, "Tidak ada kandang");
-        
+
         // Alamat yang dituju tidak boleh alamat RPH
         excludeRPH(_to);
 
@@ -724,7 +724,7 @@ contract SlaughterManager is LivestockManager {
         require(_user.role == Role(2), "Alamat RPH salah.");
 
         Livestock storage _ls = livestocks[_id - 1];
-        require(!_ls.status, "Hewan ternak tidak ada");
+        require(_ls.status, "Hewan ternak tidak ada");
 
         uint256 newId = beefCount + 1;
 
