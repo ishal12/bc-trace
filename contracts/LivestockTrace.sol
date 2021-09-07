@@ -736,6 +736,8 @@ contract SlaughterManager is LivestockManager {
 
         beefApproval[beefCount] = _to;
 
+        beefCount++;
+
         emit RegisterBeef(
             livestockOwner[_id - 1],
             _to,
