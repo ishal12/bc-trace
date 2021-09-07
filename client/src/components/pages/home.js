@@ -18,6 +18,8 @@ export default function Home() {
   const { contract, setContract } = useContext(ContractContext)
   const { user, setUser } = useContext(UserContext)
   const { livestockCounts, setLivestockCounts } = useContext(LscountContext)
+
+  const [beefCounts, setBeefcounts] = useState(0)
   // const { livestocks, setLivestocks } = useContext(LivestocksContext)
   const [livestocks, setLivestocks] = useState()
 
@@ -410,13 +412,18 @@ export default function Home() {
         axios
           .post(`http://localhost:3001/slaughters/add/`, {
             addressTo: _to,
-            id: _lsId,
+            id: parseInt(beefCounts) + 1,
             _livestock: _id,
             age: moment().diff(moment.unix(_age / 1000000), 'days'),
           })
           .then((res) => console.log(res.data))
         console.log(receipt)
       })
+  }
+
+  const getBeefCounts = async () => {
+    const beefCount = await contract.contracts.methods.beefCount().call()
+    setBeefcounts(beefCount)
   }
 
   useEffect(() => {
@@ -433,7 +440,8 @@ export default function Home() {
 
       getHewan()
       getHewanSelect()
-      console.log('livestock', contract.contracts.methods.livestocks(0).call())
+      getBeefCounts()
+      // console.log('livestock', contract.contracts.methods.livestocks(0).call())
     }
   }, [contract.accounts, pagination.currentPage])
 
@@ -462,6 +470,7 @@ export default function Home() {
         gender: res.data.gender,
         race: res.data.race,
         dob: res.data.birth,
+        _id: res.data._id
       }))
   }
 
