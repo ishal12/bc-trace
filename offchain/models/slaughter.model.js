@@ -25,6 +25,15 @@ const slaughterSchema = new Schema(
             enum: ['produktif', 'bunting', 'lainnya', 'diterima', 'antemortem', 'postmortem', 'diproses'],
             required: true,
         },
+        txAnte: {
+            type: String,
+        },
+        txPost: {
+            type: String,
+        },
+        txPack: {
+            type: String,
+        }
     },
     {
         timestamps: true,
