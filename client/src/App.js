@@ -183,7 +183,7 @@ function App() {
           })
         })
         .then(() => {
-          console.log({ ls, rs, wg, lg, hg, ow });
+          // console.log({ ls, rs, wg, lg, hg, ow });
         });
       // sapi.push({
       //   race: livestockRace,
@@ -274,7 +274,7 @@ function App() {
                 <Switch>
                   <Route exact path="/" component={Signin} />
                   <Route exact path="/kandang" component={KandangH} />
-                  <Route exact path="/detail" component={HewanDetail} />
+                  <Route path="/detail/:id" component={HewanDetail} />
                   {
                     user.role == '0' || user.role == '1' ?
                       <Route exact path="/home" component={Home} /> : ''

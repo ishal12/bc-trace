@@ -14,7 +14,7 @@ import axios from 'axios'
 import ReactPaginate from 'react-paginate'
 import '../../assets/css/pagination.css'
 
-export default function Home() {
+export default function RPH() {
   const { contract, setContract } = useContext(ContractContext)
   const { user, setUser } = useContext(UserContext)
   const { livestockCounts, setLivestockCounts } = useContext(LscountContext)

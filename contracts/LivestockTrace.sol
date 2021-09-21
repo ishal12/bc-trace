@@ -122,7 +122,7 @@ contract LivestockManager is UserManager {
         bool gender;
         uint256 wrCount;
         uint256 hrCount;
-        uint256 transterCount;
+        uint256 transferCount;
         uint256 stateCount;
         bool status;
         uint256 timeUpdated;
@@ -293,7 +293,7 @@ contract LivestockManager is UserManager {
         livestocks[globalLSCount].birthDay = _birthDay;
         livestocks[globalLSCount].earTag = stringToBytes32(_eartag);
         livestocks[globalLSCount].gender = _gender;
-        livestocks[globalLSCount].transterCount = 1;
+        livestocks[globalLSCount].transferCount = 1;
         livestocks[globalLSCount].status = true;
         livestocks[globalLSCount].timeCreated = block.number;
         livestocks[globalLSCount].timeUpdated = block.number;
@@ -420,7 +420,7 @@ contract LivestockManager is UserManager {
 
         Livestock storage _livestock = livestocks[_lsId - 1];
 
-        _livestock.wrCount++;
+        _livestock.hrCount++;
         _livestock.timeUpdated = block.number;
 
         emit AddHealth(
@@ -514,7 +514,7 @@ contract LivestockManager is UserManager {
         require(owner == msg.sender, "Bukan pemilik.");
 
         // Tambah transferCount yang terdapat di id livestock yang akan ditransfer.
-        uint256 x = livestocks[_id - 1].transterCount;
+        uint256 x = livestocks[_id - 1].transferCount;
         livestockTransfers[_id - 1][x] = _to;
 
         // Deklarasi livestock untuk diambil index sebelum dihapus.
@@ -539,7 +539,7 @@ contract LivestockManager is UserManager {
         // Ubah farmIndex pada hewan ternak berdasarkan ukuran lsId peternakan.
         _ls.farmIndex = _add.lsId.length;
         // Menambah transferCount untuk iterasi livestockTransfers.
-        _ls.transterCount++;
+        _ls.transferCount++;
         // Push lsId peternakan dengan id hewan ternak yang ditambahkan.
         _add.lsId.push(_id);
         // Menambahkan kepemilikan hewan ternak yang dimiliki oleh peternak.

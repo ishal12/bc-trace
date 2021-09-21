@@ -18,14 +18,12 @@ router.route('/select/:address').get((req, res) => {
 });
 
 router.route('/ls/:id').get((req, res) => {
-  console.log(req.params.id)
   Livestock.findOne({ id: req.params.id })
     .then((livestocks) => res.json(livestocks))
     .catch((err) => res.status(400).json('Error: ' + err))
 });
 
 router.route('/weightRecord/:id').patch((req, res) => {
-  console.log(req.params.id)
   Livestock.findOne({ id: req.params.id })
     .then((livestocks) => {
       livestocks.weight = req.body.weight;
@@ -40,7 +38,6 @@ router.route('/weightRecord/:id').patch((req, res) => {
 });
 
 router.route('/feedRecord/add/:id').post((req, res) => {
-  console.log(req.params.id)
   // BELOM DIAPA APAIN
   // const _livestock = req.body._livestock
   const id = req.params.id
@@ -66,15 +63,23 @@ router.route('/feedRecord/add/:id').post((req, res) => {
 });
 
 router.route('/feedRecord/view/:id').get((req, res) => {
-  console.log(req.params.id)
   Feed.findOne({ id: req.params.id })
     .populate('_livestock')
     .then((feed) => res.json(feed))
     .catch((err) => res.status(400).json('Error: ' + err));
 });
 
+router.route('/feedRecord/:id').get((req, res) => {
+  const offset = Number(req.query.offset);
+  const perPage = Number(req.query.perPage);
+
+  Feed.find({ id: req.params.id }).skip(offset).limit(perPage)
+    .populate('_livestock')
+    .then((feed) => res.json(feed))
+    .catch((err) => res.status(400).json('Error: ' + err));
+});
+
 router.route('/transfer/:id').patch((req, res) => {
-  console.log(req.params.id)
   Livestock.findOne({ id: req.params.id })
     .then((livestocks) => {
       livestocks.address = req.body.addressTo;
