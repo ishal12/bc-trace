@@ -1,9 +1,11 @@
 const router = require('express').Router();
-const Livestock = require('../models/livestock.model');
 let User = require('../models/user.model');
 
-router.route('/').get((req, res) => {
-  User.find()
+router.route('/process/').get((req, res) => {
+  const offset = Number(req.query.offset);
+  const perPage = Number(req.query.perPage);
+
+  User.find({ status: { $in: ['2'] } }).skip(offset).limit(perPage)
     .then((users) => res.json(users))
     .catch((err) => res.status(400).json('Error: ' + err));
 });

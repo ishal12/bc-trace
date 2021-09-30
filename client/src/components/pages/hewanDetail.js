@@ -8,6 +8,10 @@ import moment from 'moment'
 import 'moment/locale/id'
 import ReactPaginate from 'react-paginate'
 import '../../assets/css/pagination.css'
+import TablePangan from './hewanDetail/tablePangan';
+import TableTransfer from './hewanDetail/tableTransfer';
+import TableKesehatan from './hewanDetail/tableKesehatan';
+import TableBeratBadan from './hewanDetail/tableBeratBadan';
 
 function BeratBadan(props) {
   const { contract, setContract } = useContext(ContractContext)
@@ -120,7 +124,7 @@ function Kesehatan(props) {
         sick: true,
         disabled: false,
       })
-      setKesehatan((values) => ({ ...values, sick: true }))
+      setKesehatan((values) => ({ ...values, sick: true, description: '' }))
     } else {
       setSwitchSick({
         label: 'Sehat',
@@ -453,49 +457,6 @@ export default function HewanDetail() {
     'Ongole',
     'Aceh',
   ])
-  const [wRecord, setWRecord] = useState([{
-    weightR: {
-      actor: '',
-      lsId: '',
-      weight: '',
-      heartGrith: '',
-      length: '',
-      timeRecord: '',
-    },
-    actor: {
-      userAddress: '',
-      name: '',
-      role: '',
-    }
-  }])
-  const [hRecord, setHRecord] = useState([{
-    healthR: {
-      actor: '',
-      lsId: '',
-      description: '0x0',
-      action: '0x0',
-      timeRecord: '',
-    },
-    actor: {
-      userAddress: '',
-      name: '',
-      role: '',
-    }
-  }])
-  const [transfer, setTransfer] = useState([{
-    owner: {
-      userAddress: '',
-      name: '',
-      role: '',
-    },
-    key: ''
-  }])
-  const [feed, setFeed] = useState([{
-    feedType: '',
-    amount: '',
-    actor: '',
-    createdAt: ''
-  }])
 
   const [owner, setOwner] = useState()
 
@@ -505,19 +466,6 @@ export default function HewanDetail() {
     pageCount: 100 / 2,
     currentPage: 1
   })
-
-  const handlePageClick = (e) => {
-    const selectedPage = e.selected + 1;
-    const offset = (selectedPage * pagination.perPage) - pagination.perPage;
-
-    setPagination({
-      ...pagination,
-      currentPage: selectedPage,
-      offset: offset
-    }, () => {
-      // getHewan();
-    });
-  }
 
   const convertMoment = (dob) => {
     return moment().diff(moment.unix(dob / 1000000), 'days') + ' Hari'
@@ -553,30 +501,6 @@ export default function HewanDetail() {
       .then((res) => setState(res.data))
   }
 
-  const getWRecord = () => {
-    axios
-      .get(`http://localhost:3001/blockchains/wRecord/${id}`)
-      .then((res) => setWRecord(res.data))
-  }
-
-  const getHRecord = () => {
-    axios
-      .get(`http://localhost:3001/blockchains/hRecord/${id}`)
-      .then((res) => setHRecord(res.data))
-  }
-
-  const getTransfer = () => {
-    axios
-      .get(`http://localhost:3001/blockchains/transfer/${id}`)
-      .then((res) => setTransfer(res.data))
-  }
-
-  const getFeed = () => {
-    axios
-      .get(`http://localhost:3001/livestocks/feedRecord/${id}?offset=${pagination.offset}&perPage=${pagination.perPage}`)
-      .then((res) => setFeed(res.data))
-  }
-
   const getObjectId = () => {
     axios
       .get(`http://localhost:3001/livestocks/ls/${id}`)
@@ -591,10 +515,6 @@ export default function HewanDetail() {
 
   useEffect(() => {
     getLivestock()
-    getWRecord()
-    getHRecord()
-    getTransfer()
-    getFeed()
     getObjectId()
   }, [])
 
@@ -633,47 +553,7 @@ export default function HewanDetail() {
             Riwayat Berat Badan
           </h3>
           <Button className="d-inline float-right mb-3" value="beratBadan" disabled={(livestock.owner.userAddress === contract.accounts[0]) ? false : true} onClick={(e) => handleShow(e)}>Tambah</Button>
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>Tamggal</th>
-                <th>Berat</th>
-                <th>Lingkar Dada</th>
-                <th>Panjang</th>
-                <th>Penulis</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(wRecord.length != 0) ? wRecord.map((item) => {
-                return (
-                  <tr>
-                    <td>{convertMomentDate(item.weightR.timeRecord)}</td>
-                    <td>{item.weightR.weight}</td>
-                    <td>{item.weightR.heartGrith}</td>
-                    <td>{item.weightR.length}</td>
-                    <td>{item.actor.name}</td>
-                  </tr>
-                )
-              }) : <tr><td colSpan={5}>Tidak ada Record</td></tr>}
-            </tbody>
-          </Table>
-          <Pagination className="">
-            <Pagination.First />
-            <Pagination.Prev />
-            <Pagination.Item>{1}</Pagination.Item>
-            <Pagination.Ellipsis />
-
-            <Pagination.Item>{10}</Pagination.Item>
-            <Pagination.Item>{11}</Pagination.Item>
-            <Pagination.Item active>{12}</Pagination.Item>
-            <Pagination.Item>{13}</Pagination.Item>
-            <Pagination.Item disabled>{14}</Pagination.Item>
-
-            <Pagination.Ellipsis />
-            <Pagination.Item>{20}</Pagination.Item>
-            <Pagination.Next />
-            <Pagination.Last />
-          </Pagination>
+          <TableBeratBadan id={id} convertMomentDate={convertMomentDate} />
         </Col>
       </Row>
 
@@ -684,47 +564,7 @@ export default function HewanDetail() {
             Riwayat Kesehatan
           </h3>
           <Button className="d-inline float-right mb-3" value="kesehatan" disabled={(livestock.owner.userAddress === contract.accounts[0]) ? false : true} onClick={(e) => handleShow(e)}>Tambah</Button>
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>Tanggal</th>
-                <th>Deskripsi</th>
-                <th>Aksi</th>
-                <th>Sehat</th>
-                <th>Penulis</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(hRecord.length != 0) ? hRecord.map((item) => {
-                return (
-                  <tr>
-                    <td>{convertMomentDate(item.healthR.timeRecord)}</td>
-                    <td>{web3.utils.hexToUtf8(item.healthR.description)}</td>
-                    <td>{web3.utils.hexToUtf8(item.healthR.action)}</td>
-                    <td>{(item.healthR.sick) ? 'Sakit' : 'Sehat'}</td>
-                    <td>{item.actor.name}</td>
-                  </tr>
-                )
-              }) : <tr><td colSpan={5}><center>Tidak ada Record</center></td></tr>}
-            </tbody>
-          </Table>
-          <Pagination className="">
-            <Pagination.First />
-            <Pagination.Prev />
-            <Pagination.Item>{1}</Pagination.Item>
-            <Pagination.Ellipsis />
-
-            <Pagination.Item>{10}</Pagination.Item>
-            <Pagination.Item>{11}</Pagination.Item>
-            <Pagination.Item active>{12}</Pagination.Item>
-            <Pagination.Item>{13}</Pagination.Item>
-            <Pagination.Item disabled>{14}</Pagination.Item>
-
-            <Pagination.Ellipsis />
-            <Pagination.Item>{20}</Pagination.Item>
-            <Pagination.Next />
-            <Pagination.Last />
-          </Pagination>
+          <TableKesehatan id={id} convertMomentDate={convertMomentDate} />
         </Col>
       </Row>
 
@@ -735,39 +575,7 @@ export default function HewanDetail() {
             Riwayat Transfer
           </h3>
           <Button className="d-inline float-right mb-3" value="transfer" disabled={(livestock.owner.userAddress === contract.accounts[0]) ? false : true} onClick={(e) => handleShow(e)}>Tambah</Button>
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>Transfer Ke</th>
-                <th>Nama</th>
-                <th>State</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(transfer.length != 0) ? transfer.map((item) => {
-                return (
-                  <tr>
-                    <td>{item.key}</td>
-                    <td>{item.owner.userAddress}</td>
-                    <td>{item.owner.name}</td>
-                    <td>{stateType[item.owner.role]}</td>
-                  </tr>
-                )
-              }) : <tr><td colSpan={4}><center>Tidak ada Record</center></td></tr>}
-            </tbody>
-          </Table>
-          <ReactPaginate
-            breakLabel={"..."}
-            breakClassName={"break-me"}
-            pageCount={pagination.pageCount}
-            marginPagesDisplayed={2}
-            pageRangeDisplayed={5}
-            onPageChange={handlePageClick}
-            containerClassName={"pagination"}
-            subContainerClassName={"pages pagination"}
-            activeClassName={"active"}
-          />
+          <TableTransfer id={id} stateType={stateType} />
         </Col>
       </Row>
 
@@ -778,39 +586,7 @@ export default function HewanDetail() {
             Riwayat Pangan
           </h3>
           <Button className="d-inline float-right mb-3" value="pangan" disabled={(livestock.owner.userAddress === contract.accounts[0]) ? false : true} onClick={(e) => handleShow(e)}>Tambah</Button>
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>Tanggal</th>
-                <th>Jenis Pangan</th>
-                <th>Sebesar</th>
-                <th>Pemberi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(feed.length != 0) ? feed.map((item) => {
-                return (
-                  <tr>
-                    <td>{item.createdAt}</td>
-                    <td>{item.feedType}</td>
-                    <td>{item.amount}</td>
-                    <td>{item.actor}</td>
-                  </tr>
-                )
-              }) : <tr><td colSpan={4}><center>Tidak ada Record</center></td></tr>}
-            </tbody>
-          </Table>
-          <ReactPaginate
-            breakLabel={"..."}
-            breakClassName={"break-me"}
-            pageCount={pagination.pageCount}
-            marginPagesDisplayed={2}
-            pageRangeDisplayed={5}
-            onPageChange={handlePageClick}
-            containerClassName={"pagination"}
-            subContainerClassName={"pages pagination"}
-            activeClassName={"active"}
-          />
+          <TablePangan id={id} />
         </Col>
       </Row>
     </>
