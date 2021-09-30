@@ -1,6 +1,7 @@
 const router = require('express').Router();
 let Livestock = require("../models/livestock.model");
 let Feed = require("../models/feed.model")
+let User = require("../models/user.model")
 
 router.route('/:address').get((req, res) => {
   const offset = Number(req.query.offset);
@@ -38,8 +39,6 @@ router.route('/weightRecord/:id').patch((req, res) => {
 });
 
 router.route('/feedRecord/add/:id').post((req, res) => {
-  // BELOM DIAPA APAIN
-  // const _livestock = req.body._livestock
   const id = req.params.id
   const feedType = req.body.feedType
   const amount = req.body.amount
@@ -82,7 +81,21 @@ router.route('/feedRecord/:id').get((req, res) => {
 router.route('/transfer/:id').patch((req, res) => {
   Livestock.findOne({ id: req.params.id })
     .then((livestocks) => {
+      User.findOne({ address: livestocks.address })
+        .then((user) => {
+          user.totalLivestock--;
+
+          user.save()
+        })
+
       livestocks.address = req.body.addressTo;
+
+      User.findOne({ address: req.body.addressTo })
+        .then((user) => {
+          user.totalLivestock++;
+
+          user.save()
+        })
 
       livestocks
         .save()
@@ -104,8 +117,6 @@ router.route('/add').post((req, res) => {
   const alive = true;
   const address = req.body.address;
 
-  // res.json(address + ' a ' + name + ' b ' + role)
-
   const newLS = new Livestock({
     id,
     name,
@@ -122,7 +133,15 @@ router.route('/add').post((req, res) => {
 
   newLS
     .save()
-    .then(() => res.json('Hewan Ternak telah ditambahkan!'))
+    .then(() => {
+      User.findOne({ address: address })
+        .then((user) => {
+          user.totalLivestock++;
+
+          user.save()
+        })
+      res.json('Hewan Ternak telah ditambahkan!')
+    })
     .catch((err) => res.status(400).json('Error: ' + err));
 });
 

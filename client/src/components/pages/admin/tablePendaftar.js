@@ -85,7 +85,7 @@ export default function TablePangan(props) {
                   <td>{props.roleType[item.role].label}</td>
                   <td>{props.statusType[item.status].label}</td>
                   <td align="center">
-                    <Button as="input" onClick={(event) => { event.preventDefault(); }} type="button" value="Tambah" />
+                    <Button as="input" onClick={(event) => { event.preventDefault(); addUser(item.address, item.name, item.role) }} type="button" value="Tambah" />
                   </td>
                 </tr>
               )

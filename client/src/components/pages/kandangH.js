@@ -30,6 +30,11 @@ export default function KandangH() {
     { role: 2, label: 'RPH' },
   ])
 
+  const [statusType, setStatusType] = useState([
+    { role: 0, label: 'Tidak Aktif' },
+    { role: 1, label: 'Aktif' },
+  ])
+
   const handlePageClick = (e) => {
     const selectedPage = e.selected + 1;
     const offset = (selectedPage * pagination.perPage) - pagination.perPage;
@@ -84,9 +89,9 @@ export default function KandangH() {
                     return (<tr>
                       <td>{item.name}</td>
                       <td>{item.address}</td>
-                      <td>0</td>
+                      <td>{item.totalLivestock}</td>
                       <td>{roleType[item.role].label}</td>
-                      <td>{item.status}</td>
+                      <td>{statusType[item.status].label}</td>
                       <td className="text-center">
                         <Link to={location => `/kandang/detail/${item.address}`} >
                           <Button as="input" className="mr-3" type="button" value="Lihat" />

@@ -34,9 +34,28 @@ export default function TablePengguna(props) {
     });
   }
 
+  const toggleUser = (address) => {
+    setLoading(true);
+    contract.contracts.methods
+      .toggleCowshed(address)
+      .send({ from: contract.accounts[0] })
+      .on('receipt', (receipt) => {
+        setLoading(false)
+        axios
+          .patch(`http://localhost:3001/users/toggle/${address}`, {
+            txHash: receipt.transactionHash
+          })
+          .then((res) => {
+            console.log(res.data)
+            window.location.reload()
+          })
+
+      });
+  }
+
   const getPengguna = () => {
     axios
-      .get(`http://localhost:3001/users/home/?offset=${pagination.offset}&perPage=${pagination.perPage}`)
+      .get(`http://localhost:3001/users/activated/?offset=${pagination.offset}&perPage=${pagination.perPage}`)
       .then((res) => setUsers(res.data))
   }
 
@@ -66,7 +85,7 @@ export default function TablePengguna(props) {
                   <td>{props.roleType[item.role].label}</td>
                   <td>{props.statusType[item.status].label}</td>
                   <td align="center">
-                    <Button as="input" onClick={(event) => { event.preventDefault(); }} type="button" value="Tambah" />
+                    <Button as="input" onClick={(event) => { event.preventDefault(); toggleUser(item.address) }} type="button" value={(item.status == 0) ? 'Aktifkan' : 'Dinonaktifkan'} />
                   </td>
                 </tr>
               )

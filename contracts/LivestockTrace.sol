@@ -50,6 +50,12 @@ contract UserManager {
         });
     }
 
+    function toggleUser(address _address) public {
+        User storage _user = users[_address];
+
+        (_user.active == false) ? _user.active = true : _user.active = false;
+    }
+
     function getRole(address _address) public view returns (uint8) {
         return uint8(users[_address].role);
     }
@@ -186,13 +192,20 @@ contract LivestockManager is UserManager {
     ///   riwayat pemilik dari hewan ternak dapat dilihat.
     mapping(uint256 => mapping(uint256 => address)) public livestockTransfers;
 
-    event RegisterCowshed(address ownerId, string description);
+    event RegisterCowshed(address actor, string description);
 
     event RegisterLivestock(
         address ownerId,
         uint256 lsId,
         bool gender,
         Race race,
+        string description
+    );
+
+    event ToggleCowshed(
+        address actor,
+        address coswhedAddress,
+        bool status,
         string description
     );
 
@@ -244,7 +257,6 @@ contract LivestockManager is UserManager {
         require(!_cowshed.status, "Kandang sudah ada.");
 
         cowsheds[_address].ownerId = _address;
-        //farms[msg.sender].livestockCount = 0;
         cowsheds[_address].timeUpdated = block.number;
         cowsheds[_address].timeCreated = block.number;
         cowsheds[_address].status = true;
@@ -252,6 +264,23 @@ contract LivestockManager is UserManager {
         cowshedAddress.push(_address);
 
         emit RegisterCowshed(msg.sender, "Kandang telah ditambahkan.");
+    }
+
+    function toggleCowshed(address _address) public {
+        toggleUser(_address);
+
+        Cowshed storage _cowshed = cowsheds[_address];
+        string memory desc = "";
+
+        (_cowshed.status == false)
+            ? _cowshed.status = true
+            : _cowshed.status = false;
+
+        (_cowshed.status == true)
+            ? desc = "Kandang telah diaktifkan."
+            : desc = "Kandang telah dinonaktifkan.";
+
+        emit ToggleCowshed(msg.sender, _address, _cowshed.status, desc);
     }
 
     function registerLivestock(
@@ -266,22 +295,6 @@ contract LivestockManager is UserManager {
         uint16 _heartGrith,
         uint256 _time
     ) public onlyFarmer {
-        // uint256 id = livestocks.length + 1;
-
-        // Livestock memory newLivestock;
-        // newLivestock.lsId = id;
-        // newLivestock.currentFarm = msg.sender;
-        // newLivestock.fatherId = _fatherId;
-        // newLivestock.motherId = _motherId;
-        // newLivestock.birthDay = _birthDay;
-        // newLivestock.earTag = stringToBytes32(_eartag);
-        // newLivestock.gender = Gender(_gender);
-        // newLivestock.wrCount = 0;
-        // newLivestock.status = true;
-        // newLivestock.timeCreated = block.number;
-        // newLivestock.timeUpdated = block.number;
-        // livestocks.push(newLivestock);
-
         Cowshed storage _cowshed = cowsheds[msg.sender];
         require(_cowshed.status == true, "Tidak memiliki kandang");
 
@@ -299,7 +312,6 @@ contract LivestockManager is UserManager {
         livestocks[globalLSCount].timeUpdated = block.number;
         livestocks[globalLSCount].farmIndex = cowsheds[msg.sender].lsId.length;
 
-        //_farm.livestockCount++;
         _cowshed.lsId.push(newId);
 
         livestockCounts[msg.sender]++;
@@ -329,24 +341,6 @@ contract LivestockManager is UserManager {
         uint16 _heartGrith,
         uint256 _time
     ) public {
-        /*WeightRecord memory newWRecord;
-        
-        newWRecord.lsId = _lsId;
-        newWRecord.weight = _weight;
-        newWRecord.length = _length;
-        newWRecord.height = _height;
-        newWRecord.latest = true;
-        newWRecord.timeCreated = block.number;
-        newWRecord.timeUpdated = block.number;
-        
-        wRecords.push(newWRecord);*/
-
-        //wRecordsCount++;
-
-        //Livestock storage ls = livestocks[_lsId - 1];
-
-        //wRecords[wRecordsCount] = WeightRecord(wRecordsCount, _lsId, _weight, _length, _height, block.number, block.number);
-
         address owner = livestockOwner[_lsId - 1];
 
         require(owner == msg.sender, "Bukan pemilik");
@@ -385,24 +379,6 @@ contract LivestockManager is UserManager {
         uint256 _time,
         bool _sick
     ) public {
-        /*WeightRecord memory newWRecord;
-        
-        newWRecord.lsId = _lsId;
-        newWRecord.weight = _weight;
-        newWRecord.length = _length;
-        newWRecord.height = _height;
-        newWRecord.latest = true;
-        newWRecord.timeCreated = block.number;
-        newWRecord.timeUpdated = block.number;
-        
-        wRecords.push(newWRecord);*/
-
-        //wRecordsCount++;
-
-        //Livestock storage ls = livestocks[_lsId - 1];
-
-        //wRecords[wRecordsCount] = WeightRecord(wRecordsCount, _lsId, _weight, _length, _height, block.number, block.number);
-
         address owner = livestockOwner[_lsId - 1];
 
         require(owner == msg.sender, "Bukan pemilik");
@@ -432,8 +408,6 @@ contract LivestockManager is UserManager {
             "Riwayat berat badan sapi berhasil ditambahkan."
         );
     }
-
-    //function getWeightRecord(uint256 _lsid)
 
     function getLivestock(uint256 _id)
         public
@@ -670,6 +644,15 @@ contract SlaughterManager is LivestockManager {
     /// @dev Menyimpan strtuct Beef sebagai data apakah livestock tersebut akan dijadikan daging.
     mapping(uint256 => Beef) public beefs;
 
+    /// @dev Menyimpan status apakah ada proposal beef yang sedang aktif pada livestock.
+    mapping(uint256 => bool) public livestockBeefStatus;
+
+    /// @dev Sebagai penunjuk proposal beef pada livestock.
+    mapping(uint256 => mapping(uint256 => uint256)) public livestockHasBeefs;
+
+    /// @dev Menghitung banyak beef yang dimiliki livestock.
+    mapping(uint256 => uint256) public livestockBeefCounts;
+
     /// @dev Sebagai penunjuk apakah beef disetujui atau tidak oleh RPH.
     mapping(uint256 => address) public beefApproval;
 
@@ -724,7 +707,12 @@ contract SlaughterManager is LivestockManager {
         require(_user.role == Role(2), "Alamat RPH salah.");
 
         Livestock storage _ls = livestocks[_id - 1];
-        require(_ls.status, "Hewan ternak tidak ada");
+        require(_ls.status, "Hewan ternak tidak ada.");
+
+        require(
+            livestockBeefStatus[_id] == false,
+            "Hewan ternak memiliki proposal rph aktif."
+        );
 
         uint256 newId = beefCount + 1;
 
@@ -735,6 +723,10 @@ contract SlaughterManager is LivestockManager {
         beefs[beefCount].timeUpdated = block.number;
 
         beefApproval[beefCount] = _to;
+
+        livestockBeefStatus[_id] = true;
+        livestockHasBeefs[_id][livestockBeefCounts[_id]] = newId;
+        livestockBeefCounts[_id]++;
 
         beefCount++;
 
@@ -784,6 +776,8 @@ contract SlaughterManager is LivestockManager {
 
             beefDenieds[msg.sender][deniedCount[msg.sender]] = _id;
             deniedCount[msg.sender]++;
+
+            livestockBeefStatus[_id] = false;
         }
 
         _beef.timeUpdated = block.number;

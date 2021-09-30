@@ -23,6 +23,9 @@ const userSchema = new Schema(
             enum: [0, 1, 2],
             required: true,
         },
+        totalLivestock: {
+            type: Number,
+        },
         txHash: {
             type: String,
         }

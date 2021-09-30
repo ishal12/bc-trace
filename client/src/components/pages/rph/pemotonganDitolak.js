@@ -99,7 +99,7 @@ export default function PemotonganDitolak(props) {
                 </td>
               </tr>)
 
-            }) : <tr><td colSpan={8}><center>Tidak ada Record</center></td></tr>
+            }) : <tr><td colSpan={9}><center>Tidak ada Record</center></td></tr>
 
           }
         </tbody>

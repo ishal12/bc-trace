@@ -6,7 +6,6 @@ import "react-datepicker/dist/react-datepicker.css";
 import { UserContext } from '../../context/userContext'
 import { ContractContext } from '../../context/contractContext'
 import { LscountContext } from '../../context/lscountContext'
-// import { LivestocksContext } from '../../context/livestocks'
 import web3 from 'web3'
 import moment from 'moment'
 import 'moment/locale/id'
@@ -20,8 +19,8 @@ export default function Home() {
   const { livestockCounts, setLivestockCounts } = useContext(LscountContext)
 
   const [beefCounts, setBeefcounts] = useState(0)
-  // const { livestocks, setLivestocks } = useContext(LivestocksContext)
-  const [livestocks, setLivestocks] = useState()
+
+  const [livestocks, setLivestocks] = useState([])
 
   const [pagination, setPagination] = useState({
     offset: 0,
@@ -100,16 +99,6 @@ export default function Home() {
     sick: false,
     disabled: 'true',
   });
-
-  // const handleGender = (event) => {
-  //   event.persist();
-  //   setTambahHewan((values) => ({
-  //     ...values,
-  //     gender: event.target.value,
-  //   }))
-  //   // Check state gender
-  //   // console.log(event.target.value)
-  // }
 
   useEffect(() => {
     console.log(viewHewan)
@@ -217,94 +206,6 @@ export default function Home() {
     setAddressTo(e.target.value)
   }
 
-  // const handleDOB = (event) => {
-  //   event.persist();
-  //   setTambahHewan((values) => ({
-  //     ...values,
-  //     dob: moment.unix(event.target.value)._i,
-  //   }))
-  // }
-
-  // const handleFather = (event) => {
-  //   event.persist();
-  //   setTambahHewan((values) => ({
-  //     ...values,
-  //     fatherId: event.target.value,
-  //   }))
-  // }
-
-  // const handleMother = (event) => {
-  //   event.persist();
-  //   setTambahHewan((values) => ({
-  //     ...values,
-  //     motherId: event.target.value,
-  //   }))
-  // }
-
-  // const handleEarTag = (event) => {
-  //   event.persist();
-  //   setTambahHewan((values) => ({
-  //     ...values,
-  //     earTag: event.target.value,
-  //   }))
-  // }
-
-  // const handleRace = (event) => {
-  //   event.persist();
-  //   setTambahHewan((values) => ({
-  //     ...values,
-  //     race: event.target.value,
-  //   }))
-  // }
-
-  // const handleWeight = (event) => {
-  //   event.persist();
-  //   setTambahHewan((values) => ({
-  //     ...values,
-  //     weight: event.target.value,
-  //   }))
-  // }
-
-  // const handleLength = (event) => {
-  //   event.persist();
-  //   setTambahHewan((values) => ({
-  //     ...values,
-  //     length: event.target.value,
-  //   }))
-  // }
-
-  // const handleHeartGrith = (event) => {
-  //   event.persist();
-  //   setTambahHewan((values) => ({
-  //     ...values,
-  //     heartGrith: event.target.value,
-  //   }))
-  // }
-
-  const handleBeratBadan = (param) => (e) => {
-    e.persist();
-    //KIRIM KE STATE
-    setViewHewan({
-      weight: param.weight,
-      length: param.length,
-      heartGrith: param.heartGrith,
-      id: param.id,
-      gender: param.gender,
-      race: param.race,
-      dob: param.birth,
-    })
-  }
-
-  const handleKesehatan = (event) => {
-    event.persist();
-    //KIRIM KE STATE
-    setSelectHewan({
-      weight: 100,
-      length: 200,
-      heartGrith: 300,
-    })
-  }
-
   const handleViewHewan = (param, tab) => (e) => {
     e.persist()
 
@@ -319,19 +220,14 @@ export default function Home() {
       gender: param.gender,
       race: param.race,
       dob: param.birth,
+      description: 'Sehat',
       feedType: 'hijauan',
     })
-
   }
 
   const convertMoment = (dob) => {
     return moment().diff(moment.unix(dob / 1000000), 'days') + ' Hari'
   }
-
-  // const getRace = (_lsId) => {
-  //   const x = contract.contracts.methods.livestockRace(_lsId - 1).call()
-  //   setRace(x)
-  // }
 
   const addLivestock = (_name, _eartag, _father, _mother, _dob, _gender, _race, _weight, _length, _hearthGrith) => {
     console.log(parseInt(livestockCounts) + 1)
@@ -441,7 +337,6 @@ export default function Home() {
       getHewan()
       getHewanSelect()
       getBeefCounts()
-      // console.log('livestock', contract.contracts.methods.livestocks(0).call())
     }
   }, [contract.accounts, pagination.currentPage])
 
@@ -669,27 +564,7 @@ export default function Home() {
                   </tr>
                 </thead>
                 <tbody>
-                  {/* {
-                    livestocks.livestocks.map((item) => livestocks.owner[item.lsId - 1] == contract.accounts[0] && (
-                      <tr key={item.lsId}>
-                        <td>{web3.utils.hexToUtf8(item.earTag)}</td>
-                        <td>{ras.item[livestocks.race[item.lsId - 1]].nama}</td>
-                        <td>{livestocks.weight[item.lsId - 1]} kg</td>
-                        <td>{livestocks.heartGrith[item.lsId - 1]} cm</td>
-                        <td>{livestocks.length[item.lsId - 1]} cm</td>
-                        <td>{item.status ? "Hidup" : "Mati"}</td>
-                        <td className="text-center">
-                          <Button as="input" className="mr-3" onClick={(e) => { e.preventDefault(); setKey('transfer') }} type="button" value="Transfer" />
-                          <Button as="input" className="mr-3" type="button" value="BB" />
-                          <Button as="input" className="mr-3" type="button" value="Kesehatan" />
-                          <Button as="input" className="mr-3" type="button" value="Lihat" />
-                          <Button as="input" variant="danger" className="mr-3" type="button" value="Mati?" disabled={item.status ? false : true} />
-                        </td>
-                      </tr>
-                    ))
-                  } */}
-
-                  {livestocks ?
+                  {(livestocks.length != 0) ?
                     livestocks.map((item) => {
                       return (<tr>
                         <td>{item.name}</td>
@@ -703,12 +578,14 @@ export default function Home() {
                           <Button as="input" className="mr-3" onClick={handleViewHewan(item, 'beratBadan')} type="button" value="BB" />
                           <Button as="input" className="mr-3" onClick={handleViewHewan(item, 'kesehatan')} type="button" value="Kesehatan" />
                           <Button as="input" className="mr-3" onClick={handleViewHewan(item, 'pangan')} type="button" value="Pangan" />
-                          <Button as="input" className="mr-3" type="button" value="Lihat" />
+                          <Link to={location => `/hewan/detail/${item.id}`} >
+                            <Button as="input" className="mr-3" type="button" value="Lihat" />
+                          </Link>
                           <Button as="input" variant="danger" className="mr-3" type="button" value="Mati?" disabled={item.status ? false : true} />
                         </td>
                       </tr>)
 
-                    }) : ''
+                    }) : <tr><td colSpan={7}><center>Tidak ada Record</center></td></tr>
 
                   }
                 </tbody>
@@ -742,7 +619,6 @@ export default function Home() {
                       placeholder="hewan ternak"
                       name="idHewan"
                       onChange={(e) => getHewanDetail(e.target.value)}
-                      // onChange={handleBeratBadan}
                       value={viewHewan.id}
                     >
                       <option hidden>Pilih Hewan</option>

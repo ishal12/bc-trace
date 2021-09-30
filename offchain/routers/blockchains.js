@@ -20,6 +20,19 @@ router.get('/livestock/:id', async (req, res) => {
   }
 })
 
+router.get('/cowshed/:address', async (req, res) => {
+  const web3 = new Web3(Web3.givenProvider || 'http://127.0.0.1:8545');
+  const deployedNetwork = SlaughterManager.networks[5777];
+  var contract = new web3.eth.Contract(SlaughterManager.abi, deployedNetwork.address);
+  const address = req.params.address;
+  try {
+    const cowshed = await contract.methods.livestockCounts(address).call();
+    res.json(cowshed);
+  } catch (e) {
+    res.json(e);
+  }
+})
+
 router.get('/wRecord/:id', async (req, res) => {
   const offset = Number(req.query.offset);
   const perPage = Number(req.query.perPage);
@@ -68,6 +81,32 @@ router.get('/hRecord/:id', async (req, res) => {
     }
 
     for (var i = offsetFor; i >= perPageFor; i--) {
+      const healthR = await contract.methods.hRecords(id, i).call();
+      const actor = await contract.methods.users(healthR.actor).call();
+      hr.push({ healthR, actor });
+    }
+    res.json(hr);
+  } catch (e) {
+    res.json(e);
+  }
+})
+
+router.get('/hRecords/:id', async (req, res) => {
+  const web3 = new Web3(Web3.givenProvider || 'http://127.0.0.1:8545');
+  const deployedNetwork = SlaughterManager.networks[5777];
+  var contract = new web3.eth.Contract(SlaughterManager.abi, deployedNetwork.address);
+  var hr = [];
+  const id = parseInt(req.params.id - 1);
+  try {
+    const ls = await contract.methods.livestocks(id).call();
+    var offsetFor = ls.hrCount - (1 + 0);
+    var perPageFor = offsetFor - (perPage - 1);
+
+    if (perPageFor < 0) {
+      perPageFor = 0;
+    }
+
+    for (var i = offsetFor; i >= 0; i--) {
       const healthR = await contract.methods.hRecords(id, i).call();
       const actor = await contract.methods.users(healthR.actor).call();
       hr.push({ healthR, actor });
