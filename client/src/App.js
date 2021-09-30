@@ -16,6 +16,8 @@ import { ContractContext } from './context/contractContext';
 import { UserContext } from './context/userContext';
 import { LscountContext } from './context/lscountContext';
 import { LivestocksContext } from './context/livestocks'
+import HewanH from './components/pages/hewanH';
+import KandangDetail from './components/pages/kandangDetail';
 
 
 
@@ -270,11 +272,12 @@ function App() {
             <LivestocksContext.Provider value={{ livestocks, setLivestocks }}>
               <UserContext.Provider value={{ user, setUser }}>
                 <Header /><br />
-                {console.log(contract)}
                 <Switch>
                   <Route exact path="/" component={Signin} />
                   <Route exact path="/kandang" component={KandangH} />
-                  <Route path="/detail/:id" component={HewanDetail} />
+                  <Route exact path="/hewan" component={HewanH} />
+                  <Route path="/hewan/detail/:id" component={HewanDetail} />
+                  <Route path="/kandang/detail/:address" component={KandangDetail} />
                   {
                     user.role == '0' || user.role == '1' ?
                       <Route exact path="/home" component={Home} /> : ''

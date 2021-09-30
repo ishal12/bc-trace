@@ -659,7 +659,7 @@ export default function Home() {
               <Table striped bordered hover>
                 <thead>
                   <tr>
-                    <th>nama</th>
+                    <th>Nama</th>
                     <th>Jenis ras</th>
                     <th>Berat</th>
                     <th>Lingkar Dada</th>

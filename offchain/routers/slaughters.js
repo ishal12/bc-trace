@@ -29,7 +29,27 @@ router.route('/:address').get((req, res) => {
     const offset = Number(req.query.offset);
     const perPage = Number(req.query.perPage);
 
-    Slaughter.find({ addressRPH: req.params.address }).skip(offset).limit(perPage)
+    Slaughter.find({ addressRPH: req.params.address, status: { $in: ['diproses', 'diterima', 'antemortem', 'postmortem'] } }).skip(offset).limit(perPage)
+        .populate('_livestock')
+        .then((slaughter) => res.json(slaughter))
+        .catch((err) => res.status(400).json('Error: ' + err));
+});
+
+router.route('/ditolak/:address').get((req, res) => {
+    const offset = Number(req.query.offset);
+    const perPage = Number(req.query.perPage);
+
+    Slaughter.find({ addressRPH: req.params.address, status: { $in: ['produktif', 'bunting', 'lainnya'] } }).skip(offset).limit(perPage)
+        .populate('_livestock')
+        .then((slaughter) => res.json(slaughter))
+        .catch((err) => res.status(400).json('Error: ' + err));
+});
+
+router.route('/diterima/:address').get((req, res) => {
+    const offset = Number(req.query.offset);
+    const perPage = Number(req.query.perPage);
+
+    Slaughter.find({ addressRPH: req.params.address, status: { $in: ['diterima', 'postmortem'] } }).skip(offset).limit(perPage)
         .populate('_livestock')
         .then((slaughter) => res.json(slaughter))
         .catch((err) => res.status(400).json('Error: ' + err));

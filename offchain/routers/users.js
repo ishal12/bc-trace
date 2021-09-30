@@ -1,9 +1,26 @@
 const router = require('express').Router();
+const Livestock = require('../models/livestock.model');
 let User = require('../models/user.model');
 
 router.route('/').get((req, res) => {
   User.find()
     .then((users) => res.json(users))
+    .catch((err) => res.status(400).json('Error: ' + err));
+});
+
+router.route('/home/').get((req, res) => {
+  const offset = Number(req.query.offset);
+  const perPage = Number(req.query.perPage);
+
+  User.find({ role: { $in: ['0', '1'] } }).skip(offset).limit(perPage)
+    .then((users) => res.json(users))
+    .catch((err) => res.status(400).json('Error: ' + err));
+});
+
+router.route('/:address').get((req, res) => {
+  const _address = req.params.address;
+  User.findOne({ address: _address })
+    .then((user) => res.json(user))
     .catch((err) => res.status(400).json('Error: ' + err));
 });
 

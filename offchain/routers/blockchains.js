@@ -99,4 +99,18 @@ router.get('/transfer/:id', async (req, res) => {
     }
 })
 
+router.get('/slaughter/:beefId', async (req, res) => {
+    const web3 = new Web3(Web3.givenProvider || 'http://127.0.0.1:8545');
+    const deployedNetwork = SlaughterManager.networks[5777];
+    var contract = new web3.eth.Contract(SlaughterManager.abi, deployedNetwork.address);
+    var transfer = [];
+    const beefId = parseInt(req.params.beefId - 1);
+    try {
+        const beef = await contract.methods.beefs(beefId).call();
+        res.json(beef);
+    } catch (e) {
+        res.json(e);
+    }
+})
+
 module.exports = router;

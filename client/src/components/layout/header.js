@@ -8,21 +8,30 @@ export default function Header() {
   const { contract, setContract } = useContext(ContractContext);
   const { user, setUser } = useContext(UserContext)
 
+  const [headerHome, setHeaderHome] = useState({
+    link: '/home'
+  })
+
+  useEffect(() => {
+    if (user.length != 0) {
+      if (user.role == 0 || user.role == 1) {
+        setHeaderHome({ link: '/home' })
+      } else if (user.role == 2) {
+        setHeaderHome({ link: '/rph' })
+      }
+    }
+  }, [user])
+
   return (
     <>
       <Navbar bg="dark" variant="dark" fixed="top" >
-        <Navbar.Brand href="#home">LivestockTrace</Navbar.Brand>
+        <Navbar.Brand href={headerHome.link}>LivestockTrace</Navbar.Brand>
         <Nav className="justify-content-end">
-          <Nav.Link href="/">Hewan Ternak</Nav.Link>
-          <Nav.Link href="/">Kandang</Nav.Link>
+          <Nav.Link href="/hewan">Hewan Ternak</Nav.Link>
+          <Nav.Link href="/kandang">Kandang</Nav.Link>
         </Nav>
         <Navbar.Toggle />
         <Navbar.Collapse className="justify-content-end">
-          {/* <Nav className="justify-content-end">
-            <Nav.Link href="#home">Home</Nav.Link>
-            <Nav.Link href="#features">Features</Nav.Link>
-            <Nav.Link href="#pricing">Pricing</Nav.Link>
-          </Nav> */}
           <Form inline>
             <InputGroup size="sm">
               <InputGroup.Prepend>
@@ -34,8 +43,7 @@ export default function Header() {
                 aria-describedby="basic-addon1"
                 size="sm"
                 value={
-                  // contract.contracts.methods.cowsheds(user.userAddress).call()
-                  user.active
+                  user.userAddress
                 }
               />
             </InputGroup>

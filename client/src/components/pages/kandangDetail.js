@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { Button, Row, Col, Table } from 'react-bootstrap'
 import axios from 'axios'
 import ReactPaginate from 'react-paginate'
@@ -7,7 +7,20 @@ import '../../assets/css/pagination.css'
 import moment from 'moment'
 import 'moment/locale/id'
 
-export default function HewanH() {
+export default function KandangDetail() {
+  const { address } = useParams()
+  const [jabatan, setJataban] = useState([
+    { label: 'Peternak' },
+    { label: 'Stocker' },
+    { label: 'RPH' },
+  ])
+  const [user, setUser] = useState({
+    _id: '',
+    address: '',
+    name: '',
+    role: 0,
+    status: 0,
+  })
   const [livestocks, setLivestocks] = useState([{
     _id: "",
     id: "",
@@ -59,12 +72,19 @@ export default function HewanH() {
 
   const getHewan = () => {
     axios
-      .get(`http://localhost:3001/livestocks/?offset=${pagination.offset}&perPage=${pagination.perPage}`)
+      .get(`http://localhost:3001/livestocks/${address}?offset=${pagination.offset}&perPage=${pagination.perPage}`)
       .then((res) => setLivestocks(res.data))
+  }
+
+  const getUser = () => {
+    axios
+      .get(`http://localhost:3001/users/${address}`)
+      .then((res) => setUser(res.data))
   }
 
   useEffect(() => {
     getHewan()
+    getUser()
   }, [pagination])
 
   return (
@@ -73,8 +93,10 @@ export default function HewanH() {
         <Col></Col>
         <Col xl={10} className="mb-3">
           <h1>
-            Hewan Ternak
+            {user.name}
           </h1>
+          <h6 className="d-inline"># {user.address}</h6>
+          <h6 className="d-inline pl-3"># {jabatan[user.role].label}</h6>
         </Col>
         <Col></Col>
       </Row>

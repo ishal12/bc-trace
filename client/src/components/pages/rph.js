@@ -13,13 +13,22 @@ import 'moment/locale/id'
 import axios from 'axios'
 import ReactPaginate from 'react-paginate'
 import '../../assets/css/pagination.css'
+import PemotonganDitolak from './rph/pemotonganDitolak';
+import PemotonganDiterima from './rph/pemotonganDiterima';
+import MondalComp from './rph/modalComp';
 
 export default function RPH() {
   const { contract, setContract } = useContext(ContractContext)
   const { user, setUser } = useContext(UserContext)
   const { livestockCounts, setLivestockCounts } = useContext(LscountContext)
   // const { livestocks, setLivestocks } = useContext(LivestocksContext)
-  const [livestocks, setLivestocks] = useState()
+  const [livestocks, setLivestocks] = useState([])
+
+  const [showModal, setShowModal] = useState({
+    view: false,
+    label: '',
+    modal: '',
+  })
 
   const [pagination, setPagination] = useState({
     offset: 0,
@@ -29,17 +38,15 @@ export default function RPH() {
   })
 
   const [jabatan, setJabatan] = useState()
-  const [ras, setRas] = useState({
-    item: [
-      { key: 0, nama: "bali", label: "Bali" },
-      { key: 1, nama: "madura", label: "Madura" },
-      { key: 2, nama: "brahman", label: "Brahman" },
-      { key: 3, nama: "PO", label: "PO" },
-      { key: 4, nama: "brahmanCross", label: "Brahman Cross" },
-      { key: 5, nama: "ongole", label: "Ongole" },
-      { key: 6, nama: "aceh", label: "Aceh" },
-    ]
-  })
+  const [raceType, setRaceType] = useState([
+    { key: 0, nama: "bali", label: "Bali" },
+    { key: 1, nama: "madura", label: "Madura" },
+    { key: 2, nama: "brahman", label: "Brahman" },
+    { key: 3, nama: "PO", label: "PO" },
+    { key: 4, nama: "brahmanCross", label: "Brahman Cross" },
+    { key: 5, nama: "ongole", label: "Ongole" },
+    { key: 6, nama: "aceh", label: "Aceh" },
+  ])
 
   const [jenisAlasan, setJenisAlasan] = useState({
     item: [
@@ -49,20 +56,18 @@ export default function RPH() {
     ]
   })
 
-  const [race, setRace] = useState()
-
   const [key, setKey] = useState('hewanTernak');
 
   const [addressTo, setAddressTo] = useState('');
 
-  const [show, setShow] = useState({
-    ante: false,
-    post: false,
-    lihat: false,
-    label: '',
-    view: false,
-  });
-  const handleClose = () => setShow({
+  // const [show, setShow] = useState({
+  //   ante: false,
+  //   post: false,
+  //   lihat: false,
+  //   label: '',
+  //   view: false,
+  // });
+  const handleClose = () => setShowModal({
     ante: false,
     post: false,
     lihat: false,
@@ -72,17 +77,20 @@ export default function RPH() {
   const handleShow = (e, data) => {
     switch (e.target.value) {
       case 'Ante':
-        setShow((values) => ({ ...values, ante: true, view: true, label: 'Antemortem', }));
+        setShowModal((values) => ({ ...values, view: true, label: 'Antemortem', modal: 'antePost' }));
+        // setShow((values) => ({ ...values, ante: true, view: true, label: 'Antemortem', }));
         setAntePost((values) => ({ ...values, label: 'Ante', check: true, description: '', beefId: data.beefId, _id: data._id }))
         setSwitchCheck((values) => ({ ...values, ante: { check: true, disabled: true }, post: { check: true, disabled: true } }))
         break;
       case 'Post':
-        setShow((values) => ({ ...values, post: true, view: true, label: 'Postmortem' }));
+        setShowModal((values) => ({ ...values, view: true, label: 'Postmortem', modal: 'antePost' }));
+        // setShow((values) => ({ ...values, post: true, view: true, label: 'Postmortem' }));
         setAntePost((values) => ({ ...values, label: 'Post', check: true, description: '', beefId: data.beefId, _id: data._id }))
         setSwitchCheck((values) => ({ ...values, ante: { check: true, disabled: true }, post: { check: true, disabled: true } }))
         break;
       case 'Lihat':
-        setShow((values) => ({ ...values, lihat: true, label: 'Detail Hewan' }));
+        setShowModal((values) => ({ ...values, view: true, label: 'Detail Hewan', modal: 'lihat' }));
+        // setShow((values) => ({ ...values, lihat: true, label: 'Detail Hewan' }));
         setViewHewan({
           _id: data._id,
           name: data._livestock.name,
@@ -119,7 +127,6 @@ export default function RPH() {
     heartGrith: 0,
   })
 
-  const [selectHewan, setSelectHewan] = useState()
   const [viewHewan, setViewHewan] = useState({
     _id: '',
     name: '',
@@ -227,79 +234,14 @@ export default function RPH() {
 
   }
 
-
-  // const handleGender = (event) => {
-  //   event.persist();
-  //   setTambahHewan((values) => ({
-  //     ...values,
-  //     gender: event.target.value,
-  //   }))
-  //   // Check state gender
-  //   // console.log(event.target.value)
-  // }
+  const handleInputAlasan = (e) => {
+    e.persist()
+    setAntePost((values) => ({ ...values, description: e.target.value }))
+  }
 
   useEffect(() => {
-    console.log(viewHewan)
-    console.log('antePost', antePost)
+
   }, [tambahHewan, viewHewan, addressTo, antePost])
-
-  // const livestokTable = (props) => {
-  //   if (props) {
-
-  //     props.map((item) => {
-  //       return (
-  //         <tr>
-  //           <td>{item._livestock.name}</td>
-  //           <td>{ras.item[item._livestock.race].label}</td>
-  //           <td>{item._livestock.weight}</td>
-  //           <td>{item._livestock.heartGrith}</td>
-  //           <td>{item._livestock.length}</td>
-  //           <td>{item._livestock.gender ? 'Jantan' : 'Betina'}</td>
-  //           <td>{item.age} Hari</td>
-  //           <td className="text-center">
-  //             <Button as="input" className="mr-3" type="button" value="Ante" />
-  //             <Button as="input" className="mr-3" type="button" value="Post" />
-  //             <Button as="input" className="mr-3" type="button" value="Pack" />
-  //             <Button as="input" className="mr-3" type="button" value="Lihat" />
-  //           </td>
-  //         </tr>
-  //       )
-  //     })
-  //   }
-  // }
-
-
-  const handleViewHewan = (param, tab) => (e) => {
-    e.persist()
-
-    setKey(tab)
-
-    setViewHewan({
-      _id: param._id,
-      name: param._livestock.name,
-      earTag: param._livestock.earTag,
-      weight: param._livestock.weight,
-      length: param._livestock.length,
-      heartGrith: param._livestock.heartGrith,
-      beefId: param.id,
-      livestockId: param._livestock.id,
-      gender: param._livestock.gender,
-      race: param._livestock.race,
-      dob: param.age,
-      address: param._livestock.address,
-      feedType: 'hijauan',
-    })
-
-  }
-
-  const convertMoment = (dob) => {
-    return moment().diff(moment.unix(dob / 1000000), 'days') + ' Hari'
-  }
-
-  // const getRace = (_lsId) => {
-  //   const x = contract.contracts.methods.livestockRace(_lsId - 1).call()
-  //   setRace(x)
-  // }
 
   useEffect(() => {
     if (contract.accounts[0]) {
@@ -314,8 +256,6 @@ export default function RPH() {
       }
 
       getHewan()
-      getHewanSelect()
-      console.log('livestock', contract.contracts.methods.livestocks(0).call())
     }
   }, [contract, pagination.currentPage])
 
@@ -361,27 +301,6 @@ export default function RPH() {
       .then((res) => setLivestocks(res.data))
   }
 
-  const getHewanSelect = () => {
-    axios
-      .get(`http://localhost:3001/livestocks/select/${contract.accounts}`)
-      .then((res) => setSelectHewan(res.data))
-  }
-
-  const getHewanDetail = (id) => {
-    console.log(id)
-    axios
-      .get(`http://localhost:3001/livestocks/ls/${id}`)
-      .then((res) => setViewHewan({
-        weight: res.data.weight,
-        length: res.data.length,
-        heartGrith: res.data.heartGrith,
-        id: res.data.id,
-        gender: res.data.gender,
-        race: res.data.race,
-        dob: res.data.birth,
-      }))
-  }
-
   const handlePageClick = (e) => {
     const selectedPage = e.selected + 1;
     const offset = (selectedPage * pagination.perPage) - pagination.perPage;
@@ -397,7 +316,7 @@ export default function RPH() {
 
   return (
     <>
-      <Modal show={show.view} onHide={handleClose}>
+      {/* <Modal show={show.view} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>{show.label}</Modal.Title>
         </Modal.Header>
@@ -452,7 +371,7 @@ export default function RPH() {
                 Alasan
               </Form.Label>
               <Col sm={8}>
-                <Form.Control as="textarea" value={antePost.description} disabled={(antePost.label == 'Ante') ? switchCheck.ante.disabled : switchCheck.post.disabled} name="action" rows={3} placeholder="Alasan ditolak" />
+                <Form.Control as="textarea" onChange={(e) => handleInputAlasan(e)} value={antePost.description} disabled={(antePost.label == 'Ante') ? switchCheck.ante.disabled : switchCheck.post.disabled} name="action" rows={3} placeholder="Alasan ditolak" />
               </Col>
             </Form.Group>
             {console.log('check', switchCheck)}
@@ -514,10 +433,10 @@ export default function RPH() {
                   readOnly
                   value={viewHewan.race}
                 >
-                  {ras.item.map(function (ras) {
+                  {raceType.map(function (item) {
                     return (
-                      <option key={ras.key} value={ras.key}>
-                        {ras.label}
+                      <option key={item.key} value={item.key}>
+                        {item.label}
                       </option>
                     );
                   })}
@@ -602,7 +521,8 @@ export default function RPH() {
             Tutup
           </Button>
         </Modal.Footer>
-      </Modal>
+      </Modal> */}
+      <MondalComp raceType={raceType} handleClose={handleClose} show={showModal} antePost={antePost} viewHewan={viewHewan} />
 
       <Row className="Justify-content-md-center" className="mb-5 pt-5">
         <Col xl={1}></Col>
@@ -639,11 +559,11 @@ export default function RPH() {
                   </tr>
                 </thead>
                 <tbody>
-                  {livestocks ?
+                  {(livestocks.length != 0) ?
                     livestocks.map((item) => {
                       return (<tr>
                         <td>{item._livestock.name}</td>
-                        <td>{ras.item[item._livestock.race].label}</td>
+                        <td>{raceType[item._livestock.race].label}</td>
                         <td>{item._livestock.weight}</td>
                         <td>{item._livestock.heartGrith}</td>
                         <td>{item._livestock.length}</td>
@@ -658,7 +578,7 @@ export default function RPH() {
                         </td>
                       </tr>)
 
-                    }) : ''
+                    }) : <tr><td colSpan={8}><center>Tidak ada Record</center></td></tr>
 
                   }
                 </tbody>
@@ -676,6 +596,12 @@ export default function RPH() {
                 activeClassName={"active"}
               />
 
+            </Tab>
+            <Tab eventKey="pemotonganDitolak" title="Pemotongan Ditolak">
+              <PemotonganDitolak handleShow={handleShow} raceType={raceType} />
+            </Tab>
+            <Tab eventKey="pemotonganDiterima" title="Pemotongan Diterima">
+              <PemotonganDiterima handleShow={handleShow} raceType={raceType} />
             </Tab>
           </Tabs>
         </Col>

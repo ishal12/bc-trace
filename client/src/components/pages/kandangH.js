@@ -2,25 +2,56 @@ import React, { useState, useEffect, useContext } from 'react'
 import { Link } from 'react-router-dom'
 import { Form, Button, Row, Card, Col, Table, Jumbotron, Container, Pagination } from 'react-bootstrap'
 import { ContractContext } from '../../context/contractContext'
+import axios from 'axios'
+import ReactPaginate from 'react-paginate'
+import '../../assets/css/pagination.css'
 
 export default function KandangH() {
   const { contract, setContract } = useContext(ContractContext)
-  const [livestockCount, setLivestockCounts] = useState()
 
-  // useEffect(() => {
-  //     const sc = async () => {
-  //         try {
-  //             let lsCount = await contract;
-  //             setLivestockCounts(lsCount);
-  //         } catch (error) {
-  //             alert(`lserorr`);
-  //             console.error(error);
-  //         }
+  const [kandangs, setKandangs] = useState([{
+    _id: "",
+    address: "",
+    name: "",
+    role: 0,
+    status: 0,
+  }])
 
-  //     }
+  const [pagination, setPagination] = useState({
+    offset: 0,
+    perPage: 2,
+    pageCount: 100 / 2,
+    currentPage: 1
+  })
 
-  //     sc()
-  // }, [])
+  const [roleType, setRoleType] = useState([
+    { role: 0, label: 'Peternak' },
+    { role: 1, label: 'Stocker' },
+    { role: 2, label: 'RPH' },
+  ])
+
+  const handlePageClick = (e) => {
+    const selectedPage = e.selected + 1;
+    const offset = (selectedPage * pagination.perPage) - pagination.perPage;
+
+    setPagination({
+      ...pagination,
+      currentPage: selectedPage,
+      offset: offset
+    }, () => {
+      getKandang();
+    });
+  }
+
+  const getKandang = () => {
+    axios
+      .get(`http://localhost:3001/users/home/?offset=${pagination.offset}&perPage=${pagination.perPage}`)
+      .then((res) => setKandangs(res.data))
+  }
+
+  useEffect(() => {
+    getKandang()
+  }, [pagination])
 
   return (
     <>
@@ -30,7 +61,6 @@ export default function KandangH() {
           <h1>
             Kandang
           </h1>
-          {/* {console.log(contract.contracts.methods)} */}
         </Col>
         <Col></Col>
       </Row>
@@ -39,49 +69,46 @@ export default function KandangH() {
           <Table striped bordered hover>
             <thead>
               <tr>
-                <th>#</th>
                 <th>Nama</th>
-                <th>Last Name</th>
-                <th>Username</th>
+                <th>Alamat</th>
+                <th>Hewan Ternak</th>
+                <th>Role</th>
+                <th>Aktif</th>
+                <th>Aksi</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>1</td>
-                <td>Mark</td>
-                <td>Otto</td>
-                <td>@mdo</td>
-              </tr>
-              <tr>
-                <td>2</td>
-                <td>Jacob</td>
-                <td>Thornton</td>
-                <td>@fat</td>
-              </tr>
-              <tr>
-                <td>3</td>
-                <td colSpan="2">Larry the Bird</td>
-                <td>@twitter</td>
-              </tr>
+              {
+                (kandangs != 0) ?
+                  kandangs.map((item) => {
+                    return (<tr>
+                      <td>{item.name}</td>
+                      <td>{item.address}</td>
+                      <td>0</td>
+                      <td>{roleType[item.role].label}</td>
+                      <td>{item.status}</td>
+                      <td className="text-center">
+                        <Link to={location => `/kandang/detail/${item.address}`} >
+                          <Button as="input" className="mr-3" type="button" value="Lihat" />
+                        </Link>
+                      </td>
+                    </tr>)
+
+                  }) : <tr><td colSpan={8}><center>Tidak ada Record</center></td></tr>
+              }
             </tbody>
           </Table>
-          <Pagination className="">
-            <Pagination.First />
-            <Pagination.Prev />
-            <Pagination.Item>{1}</Pagination.Item>
-            <Pagination.Ellipsis />
-
-            <Pagination.Item>{10}</Pagination.Item>
-            <Pagination.Item>{11}</Pagination.Item>
-            <Pagination.Item active>{12}</Pagination.Item>
-            <Pagination.Item>{13}</Pagination.Item>
-            <Pagination.Item disabled>{14}</Pagination.Item>
-
-            <Pagination.Ellipsis />
-            <Pagination.Item>{20}</Pagination.Item>
-            <Pagination.Next />
-            <Pagination.Last />
-          </Pagination>
+          <ReactPaginate
+            breakLabel={"..."}
+            breakClassName={"break-me"}
+            pageCount={pagination.pageCount}
+            marginPagesDisplayed={2}
+            pageRangeDisplayed={5}
+            onPageChange={handlePageClick}
+            containerClassName={"pagination"}
+            subContainerClassName={"pages pagination"}
+            activeClassName={"active"}
+          />
         </Col>
 
       </Row>

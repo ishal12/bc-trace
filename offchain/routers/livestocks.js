@@ -126,4 +126,13 @@ router.route('/add').post((req, res) => {
     .catch((err) => res.status(400).json('Error: ' + err));
 });
 
+router.route('/').get((req, res) => {
+  const offset = Number(req.query.offset);
+  const perPage = Number(req.query.perPage);
+
+  Livestock.find().skip(offset).limit(perPage)
+    .then((livestocks) => res.json(livestocks))
+    .catch((err) => res.status(400).json('Error: ' + err));
+})
+
 module.exports = router;
