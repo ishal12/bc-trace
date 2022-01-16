@@ -8,12 +8,21 @@ router.route('/:address').get((req, res) => {
   const perPage = Number(req.query.perPage);
 
   Livestock.find({ address: req.params.address }).skip(offset).limit(perPage)
+    .then((livestocks) => {
+      Livestock.countDocuments({ address: req.params.address })
+        .then((count) => res.json({ livestocks, count }));
+    })
+    .catch((err) => res.status(400).json('Error: ' + err));
+});
+
+router.route('/testing').get((req, res) => {
+  Livestock.countDocuments({})
     .then((livestocks) => res.json(livestocks))
     .catch((err) => res.status(400).json('Error: ' + err));
 });
 
 router.route('/select/:address').get((req, res) => {
-  Livestock.find({ address: req.params.address })
+  Livestock.find({ address: req.params.address, alive: { $in: [true] } })
     .then((livestocks) => res.json(livestocks))
     .catch((err) => res.status(400).json('Error: ' + err))
 });
@@ -42,6 +51,7 @@ router.route('/feedRecord/add/:id').post((req, res) => {
   const id = req.params.id
   const feedType = req.body.feedType
   const amount = req.body.amount
+  const measurement = req.body.measurement
   const actor = req.body.actor
   const _livestock = req.body._livestock
 
@@ -50,6 +60,7 @@ router.route('/feedRecord/add/:id').post((req, res) => {
     _livestock,
     feedType,
     amount,
+    measurement,
     actor,
   })
   console.log(newFeed)

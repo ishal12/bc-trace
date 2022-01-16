@@ -7,6 +7,7 @@ import moment from 'moment'
 import 'moment/locale/id'
 import '../../../assets/css/pagination.css'
 import "react-datepicker/dist/react-datepicker.css";
+import AlertBox from '../../layout/alertBox';
 
 export default function MondalComp(props) {
 
@@ -29,14 +30,24 @@ export default function MondalComp(props) {
     address: '',
   })
 
+  const [alertBox, setAlertBox] = useState({
+    show: false,
+    variant: 'danger',
+    head: '',
+    body: '',
+  })
+
   return (
-    <Modal show={props.show.view} onHide={props.handleClose} size={(props.show.modal === 'lihat') ? 'lg' : ''}>
-      <Modal.Header closeButton>
-        <Modal.Title>{props.show.label}</Modal.Title>
-      </Modal.Header>
-      {(props.show.modal === 'antePost') ? <AntePost data={props.antePost} /> : ''}
-      {(props.show.modal === 'lihat') ? <Lihat raceType={props.raceType} viewHewan={props.viewHewan} /> : ''}
-    </Modal >
+    <>
+      <Modal show={props.show.view} onHide={props.handleClose} size={(props.show.modal === 'lihat') ? 'lg' : ''}>
+        <Modal.Header closeButton>
+          <Modal.Title>{props.show.label}</Modal.Title>
+        </Modal.Header>
+        {(props.show.modal === 'antePost') ? <AntePost data={props.antePost} setAlertBox={props.setAlertBox} /> : ''}
+        {(props.show.modal === 'lihat') ? <Lihat raceType={props.raceType} viewHewan={props.viewHewan} setAlertBox={props.setAlertBox} /> : ''}
+      </Modal >
+      <AlertBox body={alertBox.body} head={alertBox.head} variant={alertBox.variant} show={alertBox.show} />
+    </>
   )
 }
 
@@ -167,7 +178,23 @@ function AntePost(props) {
             alasan: _description,
             txAnte: receipt.transactionHash,
           })
-          .then((res) => console.log(res.data))
+          .then((res) => {
+            console.log(res.data)
+            props.setAlertBox({
+              variant: 'success',
+              head: 'Berhasil menambahkan riwayat Antemortem',
+              body: '' + res.data,
+              show: true,
+            })
+          })
+          .catch((err) => {
+            props.setAlertBox({
+              variant: 'danger',
+              head: 'Error',
+              body: '' + err,
+              show: true,
+            })
+          })
         console.log(receipt)
       })
   }
@@ -184,7 +211,23 @@ function AntePost(props) {
             alasan: _description,
             txPost: receipt.transactionHash,
           })
-          .then((res) => console.log(res.data))
+          .then((res) => {
+            console.log(res.data)
+            props.setAlertBox({
+              variant: 'success',
+              head: 'Berhasil menambahkan riwayat Postmortem',
+              body: res.data,
+              show: true,
+            })
+          })
+          .catch((err) => {
+            props.setAlertBox({
+              variant: 'danger',
+              head: 'Error',
+              body: '' + err,
+              show: true,
+            })
+          })
         console.log(receipt)
       })
   }
@@ -222,6 +265,7 @@ function AntePost(props) {
                 disabled={(antePost.label == 'Ante') ? switchCheck.ante.disabled : switchCheck.post.disabled}
                 onChange={(e) => handleSelectAlasan(e)}
                 value={antePost.jenisAlasan}
+                required
               >
                 <option hidden value=''>Pilih Alasan</option>
                 {(antePost.label == 'Ante') ?
@@ -243,7 +287,7 @@ function AntePost(props) {
               Alasan
             </Form.Label>
             <Col sm={8}>
-              <Form.Control as="textarea" onChange={(e) => handleInputAlasan(e)} value={antePost.description} disabled={(antePost.label == 'Ante') ? switchCheck.ante.disabled : switchCheck.post.disabled} name="action" rows={3} placeholder="Alasan ditolak" />
+              <Form.Control as="textarea" onChange={(e) => handleInputAlasan(e)} value={antePost.description} disabled={(antePost.label == 'Ante') ? switchCheck.ante.disabled : switchCheck.post.disabled} name="action" rows={3} placeholder="Alasan ditolak" required />
             </Col>
           </Form.Group>
           {console.log('check', switchCheck)}
@@ -448,6 +492,7 @@ function Lihat(props) {
           <Col sm="6">
             <Form.Control type="text" name="ante" plaintext readOnly value={(beef.datePack != 0) ? convertMomentDate(beef.datePack) : 'Belum melakukan Packing'} placeholder="Pack" />
           </Col>
+          <ButtonPack date={beef.datePack} check={beef.post} />
         </Form.Group>
 
       </Modal.Body>
@@ -486,6 +531,35 @@ function ButtonAntePost(props) {
     return (
       <Button variant="outline-danger" >
         Ditolak
+      </Button>
+    )
+  }
+}
+
+function ButtonPack(props) {
+  if (props.date == 0 && props.check == false) {
+    return (
+      <Button variant="outline-warning" >
+        Diproses
+      </Button>
+    )
+  } else if (props.date == 0 && props.check == false) {
+    return (
+      <Button variant="outline-warning" >
+        Diproses
+      </Button>
+    )
+  }
+  else if (props.date == 0 && props.check == true) {
+    return (
+      <Button variant="outline-warning" >
+        Diproses
+      </Button>
+    )
+  } else if (props.date != 0 && props.check == true) {
+    return (
+      <Button variant="outline-success" >
+        Diterima
       </Button>
     )
   }

@@ -12,6 +12,7 @@ export default function TablePangan(props) {
   const [feed, setFeed] = useState([{
     feedType: '',
     amount: '',
+    measurement: '',
     actor: '',
     createdAt: ''
   }])
@@ -63,7 +64,7 @@ export default function TablePangan(props) {
               <tr>
                 <td>{item.createdAt}</td>
                 <td>{item.feedType}</td>
-                <td>{item.amount}</td>
+                <td>{item.amount} {item.measurement}</td>
                 <td>{item.actor}</td>
               </tr>
             )

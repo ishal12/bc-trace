@@ -16,6 +16,7 @@ import '../../assets/css/pagination.css'
 import PemotonganDitolak from './rph/pemotonganDitolak';
 import PemotonganDiterima from './rph/pemotonganDiterima';
 import MondalComp from './rph/modalComp';
+import AlertBox from '../layout/alertBox';
 
 export default function RPH() {
   const { contract, setContract } = useContext(ContractContext)
@@ -28,6 +29,13 @@ export default function RPH() {
     view: false,
     label: '',
     modal: '',
+  })
+
+  const [alertBox, setAlertBox] = useState({
+    show: false,
+    variant: 'danger',
+    head: '',
+    body: '',
   })
 
   const [pagination, setPagination] = useState({
@@ -237,6 +245,37 @@ export default function RPH() {
   const handleInputAlasan = (e) => {
     e.persist()
     setAntePost((values) => ({ ...values, description: e.target.value }))
+  }
+
+  const packing = (_beefId, _epox, _id) => {
+    contract.contracts.methods.packingBeef(_beefId, _epox)
+      .send({ from: contract.accounts[0] })
+      .on('receipt', (receipt) => {
+        axios
+          .patch(`http://localhost:3001/slaughters/packing`, {
+            beefId: _beefId,
+            id: _id,
+            txPack: receipt.transactionHash,
+          })
+          .then((res) => {
+            console.log(res.data)
+            setAlertBox({
+              variant: 'success',
+              head: 'Berhasil membungkus daging sapi.',
+              body: '' + res.data,
+              show: true,
+            })
+          })
+          .catch((err) => {
+            setAlertBox({
+              variant: 'danger',
+              head: 'Error',
+              body: '' + err,
+              show: true,
+            })
+          })
+        console.log(receipt)
+      })
   }
 
   useEffect(() => {
@@ -522,7 +561,7 @@ export default function RPH() {
           </Button>
         </Modal.Footer>
       </Modal> */}
-      <MondalComp raceType={raceType} handleClose={handleClose} show={showModal} antePost={antePost} viewHewan={viewHewan} />
+      <MondalComp raceType={raceType} handleClose={handleClose} show={showModal} antePost={antePost} viewHewan={viewHewan} setAlertBox={setAlertBox} />
 
       <Row className="Justify-content-md-center" className="mb-5 pt-5">
         <Col xl={1}></Col>
@@ -564,16 +603,16 @@ export default function RPH() {
                       return (<tr>
                         <td>{item._livestock.name}</td>
                         <td>{raceType[item._livestock.race].label}</td>
-                        <td>{item._livestock.weight}</td>
-                        <td>{item._livestock.heartGrith}</td>
-                        <td>{item._livestock.length}</td>
+                        <td>{item._livestock.weight} kg</td>
+                        <td>{item._livestock.heartGrith} cm</td>
+                        <td>{item._livestock.length} cm</td>
                         <td>{item._livestock.gender ? 'Jantan' : 'Betina'}</td>
                         <td>{item.age} Hari</td>
                         <td className="text-center">
                           <Button as="input" className="mr-3" type="button" onClick={(e) => handleShow(e, item)} value="Ante" disabled={(item.status == 'diproses') ? false : true} />
 
                           <Button as="input" className="mr-3" type="button" onClick={(e) => handleShow(e, item)} value="Post" disabled={(item.status == 'antemortem') ? false : true} />
-                          <Button as="input" className="mr-3" type="button" value="Pack" disabled={(item.status == 'postmortem') ? false : true} />
+                          <Button as="input" className="mr-3" type="button" onClick={(e) => { e.preventDefault(); packing(item.beefId, moment.unix(new Date())._i, item._id) }} value="Pack" disabled={(item.status == 'postmortem') || (item.status == 'packing') ? false : true} />
                           <Button as="input" className="mr-3" type="button" onClick={(e) => handleShow(e, item)} value="Lihat" />
                         </td>
                       </tr>)
@@ -606,6 +645,7 @@ export default function RPH() {
           </Tabs>
         </Col>
       </Row>
+      <AlertBox body={alertBox.body} head={alertBox.head} variant={alertBox.variant} show={alertBox.show} />
     </>
   )
 }

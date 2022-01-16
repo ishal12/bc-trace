@@ -770,14 +770,14 @@ contract SlaughterManager is LivestockManager {
             uint256 x = _ls.stateCount;
             livestockStates[lsId - 1][x] = State.butcher;
             _ls.stateCount++;
-        } else {
+        } else if (_approval == false) {
             _beef.ante = false;
             _beef.desc = stringToBytes32(_desc);
 
             beefDenieds[msg.sender][deniedCount[msg.sender]] = _id;
             deniedCount[msg.sender]++;
 
-            livestockBeefStatus[_id] = false;
+            livestockBeefStatus[_beef.lsId] = false;
         }
 
         _beef.timeUpdated = block.number;

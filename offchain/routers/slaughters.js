@@ -49,7 +49,7 @@ router.route('/diterima/:address').get((req, res) => {
     const offset = Number(req.query.offset);
     const perPage = Number(req.query.perPage);
 
-    Slaughter.find({ addressRPH: req.params.address, status: { $in: ['diterima', 'postmortem'] } }).skip(offset).limit(perPage)
+    Slaughter.find({ addressRPH: req.params.address, status: { $in: ['diterima', 'postmortem', 'packing'] } }).skip(offset).limit(perPage)
         .populate('_livestock')
         .then((slaughter) => res.json(slaughter))
         .catch((err) => res.status(400).json('Error: ' + err));
@@ -120,6 +120,23 @@ router.route('/post').patch((req, res) => {
                     } else {
                         res.json(`BeefId ${beefId} tidak dapat melewati pengecekan Postmortem dikarenakan ${alasan}.`);
                     }
+                })
+                .catch((err) => res.status(400).json('Error: ' + err));
+        })
+})
+
+router.route('/packing').patch((req, res) => {
+    const beefId = req.body.beefId;
+    const id = req.body.id;
+    Slaughter.findOne({ _id: id })
+        .then((slaughter) => {
+            slaughter.txPack = req.body.txPack;
+            slaughter.status = 'packing';
+
+            slaughter
+                .save()
+                .then(() => {
+                    res.json(`BeefId ${beefId} telah dipacking.`);
                 })
                 .catch((err) => res.status(400).json('Error: ' + err));
         })

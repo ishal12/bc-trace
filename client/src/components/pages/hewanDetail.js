@@ -12,6 +12,7 @@ import TablePangan from './hewanDetail/tablePangan';
 import TableTransfer from './hewanDetail/tableTransfer';
 import TableKesehatan from './hewanDetail/tableKesehatan';
 import TableBeratBadan from './hewanDetail/tableBeratBadan';
+import AlertBox from '../layout/alertBox';
 
 function BeratBadan(props) {
   const { contract, setContract } = useContext(ContractContext)
@@ -49,7 +50,23 @@ function BeratBadan(props) {
             length: _length,
             heartGrith: _hearthGrith,
           })
-          .then((res) => console.log(res.data))
+          .then((res) => {
+            console.log(res.data)
+            props.setAlertBox({
+              variant: 'success',
+              head: 'Berhasil menambahkan riwayat berat badan hewan',
+              body: `Riwayat berat badan sapi dengan id ${_lsId}, berhasil ditambahkan.`,
+              show: true,
+            })
+          })
+          .catch((err) => {
+            props.setAlertBox({
+              variant: 'danger',
+              head: 'Error',
+              body: '' + err,
+              show: true,
+            })
+          })
         console.log(receipt)
       })
   }
@@ -63,27 +80,36 @@ function BeratBadan(props) {
             <Form.Label className="text-right" column sm={3}>
               Berat
             </Form.Label>
-            <Col sm={8}>
+            <Col sm={6}>
               <Form.Control type="number" name="weight" min={0} onChange={(e) => handleTambahBB(e)} placeholder="Berat" value={tambahBB.weight} />
             </Col>
+            <Form.Label className="text-left" column sm={2}>
+              kg
+            </Form.Label>
           </Form.Group>
 
           <Form.Group as={Row} controlId="formBeratBadan">
             <Form.Label className="text-right" column sm={3}>
               Lingkar Dada
             </Form.Label>
-            <Col sm={8}>
+            <Col sm={6}>
               <Form.Control type="number" name="heartGrith" min={0} onChange={(e) => handleTambahBB(e)} placeholder="Lingkar Dada" value={tambahBB.heartGrith} />
             </Col>
+            <Form.Label className="text-left" column sm={2}>
+              cm
+            </Form.Label>
           </Form.Group>
 
           <Form.Group as={Row} controlId="formBeratBadan">
             <Form.Label className="text-right" column sm={3}>
               Panjang
             </Form.Label>
-            <Col sm={8}>
+            <Col sm={6}>
               <Form.Control type="number" name="length" min={0} onChange={(e) => handleTambahBB(e)} placeholder="Panjang" value={tambahBB.length} />
             </Col>
+            <Form.Label className="text-left" column sm={2}>
+              cm
+            </Form.Label>
           </Form.Group>
 
         </Form>
@@ -153,6 +179,12 @@ function Kesehatan(props) {
       .send({ from: contract.accounts[0] })
       .on('receipt', (receipt) => {
         console.log(receipt)
+        props.setAlertBox({
+          variant: 'success',
+          head: 'Berhasil menambahkan riwayat kesehatan.',
+          body: `Riwayat kesehatan sapi dengan id ${_lsId}, berhasil ditambahkan.\nStatus: ${(_sick ? 'Sakit' : 'Sehat')}\nKeterangan: ${_description}\nAksi: ${_action}`,
+          show: true,
+        })
       })
   }
 
@@ -235,8 +267,32 @@ function Transfer(props) {
           .patch(`http://localhost:3001/livestocks/transfer/${_id}`, {
             addressTo: _to,
           })
-          .then((res) => console.log(res.data))
+          .then((res) => {
+            console.log(res.data)
+            props.setAlertBox({
+              variant: 'success',
+              head: 'Berhasil mengirimkan hewan ternak',
+              body: `Pengiriman hewan ternak dengan id ${_id} \ndari pemilik ${_from} \nke pemilik ${_to}\ntelah berhasil dikirim.`,
+              show: true,
+            })
+          })
+          .catch((err) => {
+            props.setAlertBox({
+              variant: 'danger',
+              head: 'Error',
+              body: '' + err,
+              show: true,
+            })
+          })
         console.log(receipt)
+      })
+      .on('error', (error) => {
+        props.setAlertBox({
+          variant: 'danger',
+          head: 'Error ' + error.code,
+          body: `Alamat pengiriman salah`,
+          show: true,
+        })
       })
   }
 
@@ -284,6 +340,7 @@ function Pangan(props) {
   const [feed, setFeed] = useState({
     feedAmount: '',
     feedType: 'hijauan',
+    feedMeasurement: 'kg',
     id: props.idParams,
     _id: props._idLs
   })
@@ -298,6 +355,15 @@ function Pangan(props) {
     ]
   })
 
+  const [feedMeasurement, setFeedMeasurement] = useState({
+    item: [
+      { enum: 'ml', label: 'ml' },
+      { enum: 'l', label: 'l' },
+      { enum: 'g', label: 'g' },
+      { enum: 'kg', label: 'kg' },
+    ]
+  })
+
   const handleFeed = (e) => {
     switch (e.target.name) {
       case 'feedType':
@@ -306,21 +372,41 @@ function Pangan(props) {
       case 'feedAmount':
         setFeed((values) => ({ ...values, feedAmount: e.target.value }));
         break;
+      case 'feedMeasurement':
+        setFeed((values) => ({ ...values, feedMeasurement: e.target.value }));
+        break;
       default:
         break;
     }
   }
 
-  const addFeedRecord = (_id, _lsId, _feedType, _feedAmount) => {
+  const addFeedRecord = (_id, _lsId, _feedType, _feedAmount, _feedMeasurement) => {
     axios
       .post(`http://localhost:3001/livestocks/feedRecord/add/${_lsId}`, {
         id: _lsId,
         _livestock: _id,
         feedType: _feedType,
         amount: _feedAmount,
+        measurement: _feedMeasurement,
         actor: contract.accounts[0],
       })
-      .then((res) => console.log(res.data))
+      .then((res) => {
+        console.log(res.data)
+        props.setAlertBox({
+          variant: 'success',
+          head: 'Berhasil menambahkan riwayat pangan',
+          body: `Riwayat pangan untuk sapi dengan id ${_lsId}, berhasil ditambahkan.`,
+          show: true,
+        })
+      })
+      .catch((err) => {
+        props.setAlertBox({
+          variant: 'danger',
+          head: 'Error',
+          body: '' + err,
+          show: true,
+        })
+      })
   }
 
   return (
@@ -357,6 +443,21 @@ function Pangan(props) {
             <Col sm={4}>
               <Form.Control type="number" name="feedAmount" min={0} onChange={(e) => handleFeed(e)} placeholder="jumlah" value={feed.feedAmount} />
             </Col>
+            <Col sm={3}>
+              <Form.Control
+                as="select"
+                placeholder="hewan ternak"
+                name="feedMeasurement"
+                onChange={(e) => handleFeed(e)}
+                value={feed.feedMeasurement}
+              >
+                {feedMeasurement.item ?
+                  feedMeasurement.item.map((item) => {
+                    return (<option value={item.enum}>{item.label}</option>)
+                  }) : ''
+                }
+              </Form.Control>
+            </Col>
           </Form.Group>
 
         </Form>
@@ -365,7 +466,7 @@ function Pangan(props) {
         <Button variant="secondary" onClick={props.handleClose}>
           Batal
         </Button>
-        <Button variant="primary" onClick={(e) => { e.preventDefault(); addFeedRecord(feed._id, feed.id, feed.feedType, feed.feedAmount) }} >
+        <Button variant="primary" onClick={(e) => { e.preventDefault(); addFeedRecord(feed._id, feed.id, feed.feedType, feed.feedAmount, feed.feedMeasurement) }} >
           Simpan
         </Button>
       </Modal.Footer>
@@ -380,10 +481,10 @@ function ModalComp(props) {
       <Modal.Header closeButton>
         <Modal.Title>{props.show.label}</Modal.Title>
       </Modal.Header>
-      {(props.show.modal === 'beratBadan') ? <BeratBadan idParams={props.idParams} handleClose={props.handleClose} /> : ''}
-      {(props.show.modal === 'kesehatan') ? <Kesehatan idParams={props.idParams} handleClose={props.handleClose} /> : ''}
-      {(props.show.modal === 'transfer') ? <Transfer idParams={props.idParams} handleClose={props.handleClose} /> : ''}
-      {(props.show.modal === 'pangan') ? <Pangan idParams={props.idParams} _idLs={props._idLs} handleClose={props.handleClose} /> : ''}
+      {(props.show.modal === 'beratBadan') ? <BeratBadan idParams={props.idParams} handleClose={props.handleClose} setAlertBox={props.setAlertBox} /> : ''}
+      {(props.show.modal === 'kesehatan') ? <Kesehatan idParams={props.idParams} handleClose={props.handleClose} setAlertBox={props.setAlertBox} /> : ''}
+      {(props.show.modal === 'transfer') ? <Transfer idParams={props.idParams} handleClose={props.handleClose} setAlertBox={props.setAlertBox} /> : ''}
+      {(props.show.modal === 'pangan') ? <Pangan idParams={props.idParams} _idLs={props._idLs} handleClose={props.handleClose} setAlertBox={props.setAlertBox} /> : ''}
     </Modal >
   )
 }
@@ -392,7 +493,15 @@ export default function HewanDetail() {
   const { contract, setContract } = useContext(ContractContext)
   const { id } = useParams()
   const [objectId, setObjectId] = useState({
-    _id: ''
+    _id: '',
+    name: '',
+  })
+
+  const [alertBox, setAlertBox] = useState({
+    show: false,
+    variant: 'danger',
+    head: '',
+    body: '',
   })
 
   const [show, setShow] = useState({
@@ -446,7 +555,8 @@ export default function HewanDetail() {
   const [stateType, setStateType] = useState([
     'Farmer',
     'Stocker',
-    'Butcher'
+    'Butcher',
+    'Beef'
   ])
   const [raceType, setRaceType] = useState([
     'Bali',
@@ -520,13 +630,13 @@ export default function HewanDetail() {
 
   return (
     <>
-      <ModalComp show={show} idParams={id} _idLs={objectId._id} handleClose={handleClose}></ModalComp>
+      <ModalComp show={show} idParams={id} _idLs={objectId._id} handleClose={handleClose} setAlertBox={setAlertBox} />
       <Row className="Justify-content-md-center" className="mb-5 pt-5">
         <Col xl={1}></Col>
         <Col xl={8}>
           <>
             <h1>
-              {(livestock.ls.earTag) ? web3.utils.hexToUtf8(livestock.ls.earTag) : ''}
+              {objectId.name}
             </h1>
             <h6 className="d-inline text-muted"># {livestock.ls.lsId}</h6>
             <h6 className="d-inline text-muted pl-3"># {(livestock.ls.earTag) ? web3.utils.hexToUtf8(livestock.ls.earTag) : ''}</h6>
@@ -589,6 +699,7 @@ export default function HewanDetail() {
           <TablePangan id={id} />
         </Col>
       </Row>
+      <AlertBox body={alertBox.body} head={alertBox.head} variant={alertBox.variant} show={alertBox.show} />
     </>
   )
 }

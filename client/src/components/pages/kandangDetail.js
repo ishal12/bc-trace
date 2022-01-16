@@ -73,7 +73,10 @@ export default function KandangDetail() {
   const getHewan = () => {
     axios
       .get(`http://localhost:3001/livestocks/${address}?offset=${pagination.offset}&perPage=${pagination.perPage}`)
-      .then((res) => setLivestocks(res.data))
+      .then((res) => {
+        setLivestocks(res.data.livestocks);
+        setPagination({ ...pagination, pageCount: res.data.count / 2 });
+      })
   }
 
   const getUser = () => {
@@ -85,7 +88,7 @@ export default function KandangDetail() {
   useEffect(() => {
     getHewan()
     getUser()
-  }, [pagination])
+  }, [pagination.currentPage])
 
   return (
     <>

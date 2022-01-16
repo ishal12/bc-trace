@@ -21,6 +21,10 @@ const feedSchema = new Schema(
             type: Number,
             required: true,
         },
+        measurement: {
+            type: String,
+            Enum: ['ml', 'g', 'kg', 'l'],
+        },
         actor: {
             type: String,
             required: true,

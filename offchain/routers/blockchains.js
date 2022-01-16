@@ -180,4 +180,16 @@ router.get('/slaughter/:beefId', async (req, res) => {
   }
 })
 
+router.get('/user/:id', async (req, res) => {
+  const web3 = new Web3(Web3.givenProvider || 'http://127.0.0.1:8545');
+  const deployedNetwork = SlaughterManager.networks[5777];
+  var contract = new web3.eth.Contract(SlaughterManager.abi, deployedNetwork.address);
+  try {
+    const shed = await contract.methods.beefs(req.params.id).call();
+    res.json(shed);
+  } catch (e) {
+    res.json(e);
+  }
+})
+
 module.exports = router;

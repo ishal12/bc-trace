@@ -88,10 +88,10 @@ export default function PemotonganDitolak(props) {
               return (<tr>
                 <td>{item._livestock.name}</td>
                 <td>{props.raceType[item._livestock.race].label}</td>
-                <td>{item._livestock.weight}</td>
-                <td>{item._livestock.heartGrith}</td>
-                <td>{item._livestock.length}</td>
-                <td>{item._livestock.gender ? 'Jantan' : 'Betina'}</td>
+                <td className='text-right'>{item._livestock.weight.toLocaleString().replace(',', '.')} kg</td>
+                <td className='text-right'>{item._livestock.heartGrith.toLocaleString().replace(',', '.')} cm</td>
+                <td className='text-right'>{item._livestock.length.toLocaleString().replace(',', '.')} cm</td>
+                <td className='text-right'>{item._livestock.gender ? 'Jantan' : 'Betina'}</td>
                 <td>{item.age} Hari</td>
                 <td>{item.status}</td>
                 <td className="text-center">

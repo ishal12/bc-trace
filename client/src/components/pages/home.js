@@ -12,11 +12,21 @@ import 'moment/locale/id'
 import axios from 'axios'
 import ReactPaginate from 'react-paginate'
 import '../../assets/css/pagination.css'
+import ProsesDaging from './home/prosesDaging';
+import AlertBox from '../layout/alertBox';
+import NumberFormat from "react-number-format";
 
 export default function Home() {
   const { contract, setContract } = useContext(ContractContext)
   const { user, setUser } = useContext(UserContext)
   const { livestockCounts, setLivestockCounts } = useContext(LscountContext)
+
+  const [alertBox, setAlertBox] = useState({
+    show: false,
+    variant: 'danger',
+    head: '',
+    body: '',
+  })
 
   const [beefCounts, setBeefcounts] = useState(0)
 
@@ -25,7 +35,7 @@ export default function Home() {
   const [pagination, setPagination] = useState({
     offset: 0,
     perPage: 2,
-    pageCount: 100 / 2,
+    pageCount: 10 / 2,
     currentPage: 1
   })
 
@@ -45,10 +55,19 @@ export default function Home() {
   const [feed, setFeed] = useState({
     item: [
       { enum: 'hijauan', label: 'Hijauan' },
-      { enum: 'konsentrat', label: 'Konsenstrat' },
+      { enum: 'konsentrat', label: 'Konsentrat' },
       { enum: 'tambahan', label: 'Tambahan' },
       { enum: 'vitamin', label: 'Vitamin' },
       { enum: 'obat', label: 'Obat' },
+    ]
+  })
+
+  const [feedMeasurement, setFeedMeasurement] = useState({
+    item: [
+      { enum: 'ml', label: 'ml' },
+      { enum: 'lt', label: 'lt' },
+      { enum: 'g', label: 'g' },
+      { enum: 'kg', label: 'kg' },
     ]
   })
 
@@ -88,10 +107,11 @@ export default function Home() {
     race: 0,
     id: 0,
     sick: false,
-    description: '',
-    action: '',
+    description: 'Sehat',
+    action: 'CheckUp',
     feedType: 'hijauan',
     feedAmount: 0,
+    feedMeasurement: 'kg'
   })
 
   const [switchSick, setSwitchSick] = useState({
@@ -175,6 +195,9 @@ export default function Home() {
       case 'feedAmount':
         setViewHewan((values) => ({ ...values, feedAmount: e.target.value }));
         break;
+      case 'feedMeasurement':
+        setViewHewan((values) => ({ ...values, feedMeasurement: e.target.value }));
+        break;
       default:
         break;
     }
@@ -196,7 +219,7 @@ export default function Home() {
         sick: false,
         disabled: true,
       })
-      setViewHewan((values) => ({ ...values, sick: false, description: '' }))
+      setViewHewan((values) => ({ ...values, sick: false, description: 'Sehat' }))
     }
   }
 
@@ -248,7 +271,23 @@ export default function Home() {
             birth: _dob,
             address: contract.accounts[0],
           })
-          .then((res) => console.log(res.data))
+          .then((res) => {
+            console.log(res.data)
+            setAlertBox({
+              variant: 'success',
+              head: 'Berhasil menambahkan hewan ternak',
+              body: `Sapi jenis ${ras.item[_race].label} berhasil ditambahkan.`,
+              show: true,
+            })
+          })
+          .catch((err) => {
+            setAlertBox({
+              variant: 'danger',
+              head: 'Error',
+              body: '' + err,
+              show: true,
+            })
+          })
         // window.location.reload();
       })
   }
@@ -263,7 +302,23 @@ export default function Home() {
             length: _length,
             heartGrith: _hearthGrith,
           })
-          .then((res) => console.log(res.data))
+          .then((res) => {
+            console.log(res.data)
+            setAlertBox({
+              variant: 'success',
+              head: 'Berhasil menambahkan riwayat berat badan hewan',
+              body: `Riwayat berat badan sapi dengan id ${_lsId}, berhasil ditambahkan.`,
+              show: true,
+            })
+          })
+          .catch((err) => {
+            setAlertBox({
+              variant: 'danger',
+              head: 'Error',
+              body: '' + err,
+              show: true,
+            })
+          })
         console.log(receipt)
       })
   }
@@ -273,19 +328,43 @@ export default function Home() {
       .send({ from: contract.accounts[0] })
       .on('receipt', (receipt) => {
         console.log(receipt)
+        setAlertBox({
+          variant: 'success',
+          head: 'Berhasil menambahkan riwayat kesehatan.',
+          body: `Riwayat kesehatan sapi dengan id ${_lsId}, berhasil ditambahkan.\nStatus: ${_sick}\nKeterangan: ${_description}\nAksi: ${_action}`,
+          show: true,
+        })
       })
   }
 
-  const addFeedRecord = (_id, _lsId, _feedType, _feedAmount) => {
+  const addFeedRecord = (_id, _lsId, _feedType, _feedAmount, _feedMeasurement) => {
     axios
       .post(`http://localhost:3001/livestocks/feedRecord/add/${_lsId}`, {
         id: _lsId,
         _livestock: _id,
         feedType: _feedType,
         amount: _feedAmount,
+        measurement: _feedMeasurement,
         actor: contract.accounts[0],
       })
-      .then((res) => console.log(res.data))
+      .then((res) => {
+        console.log(res.data)
+        setAlertBox({
+          variant: 'success',
+          head: 'Berhasil menambahkan riwayat pangan',
+          body: `Riwayat pangan untuk sapi dengan id ${_lsId}, berhasil ditambahkan.`,
+          show: true,
+        })
+      })
+      .catch((err) => {
+        setAlertBox({
+          variant: 'danger',
+          head: 'Error',
+          body: '' + err,
+          show: true,
+        })
+      })
+
   }
 
   const transferLivestock = (_id, _from, _to) => {
@@ -296,7 +375,23 @@ export default function Home() {
           .patch(`http://localhost:3001/livestocks/transfer/${_id}`, {
             addressTo: _to,
           })
-          .then((res) => console.log(res.data))
+          .then((res) => {
+            console.log(res.data)
+            setAlertBox({
+              variant: 'success',
+              head: 'Berhasil mengirimkan hewan ternak',
+              body: `Pengiriman hewan ternak dengan id ${_id} \ndari pemilik ${_from} \nke pemilik ${_to}\ntelah berhasil dikirim.`,
+              show: true,
+            })
+          })
+          .catch((err) => {
+            setAlertBox({
+              variant: 'danger',
+              head: 'Error',
+              body: '' + err,
+              show: true,
+            })
+          })
         console.log(receipt)
       })
   }
@@ -344,7 +439,10 @@ export default function Home() {
 
     axios
       .get(`http://localhost:3001/livestocks/${contract.accounts}?offset=${pagination.offset}&perPage=${pagination.perPage}`)
-      .then((res) => setLivestocks(res.data))
+      .then((res) => {
+        setLivestocks(res.data.livestocks);
+        setPagination({ ...pagination, pageCount: res.data.count / 2 });
+      })
   }
 
   const getHewanSelect = () => {
@@ -365,7 +463,11 @@ export default function Home() {
         gender: res.data.gender,
         race: res.data.race,
         dob: res.data.birth,
-        _id: res.data._id
+        description: 'Sehat',
+        _id: res.data._id,
+        feedType: 'hijauan',
+        feedAmount: 0,
+        feedMeasurement: 'kg'
       }))
   }
 
@@ -384,6 +486,7 @@ export default function Home() {
 
   return (
     <>
+      <AlertBox body={alertBox.body} head={alertBox.head} variant={alertBox.variant} show={alertBox.show} />
       <Modal show={show} size="lg" onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Tambah Hewan Ternak</Modal.Title>
@@ -569,9 +672,9 @@ export default function Home() {
                       return (<tr>
                         <td>{item.name}</td>
                         <td>{ras.item[item.race].label}</td>
-                        <td>{item.weight}</td>
-                        <td>{item.heartGrith}</td>
-                        <td>{item.length}</td>
+                        <td className="text-right">{item.weight.toLocaleString().replace(',', '.')} kg</td>
+                        <td className="text-right">{item.heartGrith.toLocaleString().replace(',', '.')} cm</td>
+                        <td className="text-right">{item.length.toLocaleString().replace(',', '.')} cm</td>
                         <td>{item.alive ? 'Hidup' : 'Mati'}</td>
                         <td className="text-center">
                           <Button as="input" className="mr-3" onClick={handleViewHewan(item, 'transfer')} type="button" value="Transfer" />
@@ -590,7 +693,8 @@ export default function Home() {
                   }
                 </tbody>
               </Table>
-              <Button as="input" variant="success" className="mr- float-right" onClick={handleShow} type="button" value="Tambah" />
+              {user.role == '0' ? <Button as="input" variant="success" className="mr- float-right" onClick={handleShow} type="button" value="Tambah" /> :
+                ''}
 
               <ReactPaginate
                 breakLabel={"..."}
@@ -635,9 +739,12 @@ export default function Home() {
                   <Form.Label className="text-right" column sm={4}>
                     Berat
                   </Form.Label>
-                  <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Berat" value={viewHewan.weight} />
+                  <Col sm={1}>
+                    <Form.Control plaintext className="text-right" readOnly placeholder="Berat" value={viewHewan.weight.toLocaleString().replace(',', '.')} />
                   </Col>
+                  <Form.Label className="text-left" column sm={1}>
+                    kg
+                  </Form.Label>
 
                   <Form.Label className="text-right" column sm={2}>
                     Umur
@@ -651,9 +758,12 @@ export default function Home() {
                   <Form.Label className="text-right" column sm={4}>
                     Lingkar Dada
                   </Form.Label>
-                  <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Lingkar Dada" value={viewHewan.heartGrith} />
+                  <Col sm={1}>
+                    <Form.Control plaintext className="text-right" readOnly placeholder="Lingkar Dada" value={viewHewan.heartGrith.toLocaleString().replace(',', '.')} />
                   </Col>
+                  <Form.Label className="text-left" column sm={1}>
+                    cm
+                  </Form.Label>
 
                   <Form.Label className="text-right" column sm={2}>
                     Kelamin
@@ -667,9 +777,12 @@ export default function Home() {
                   <Form.Label className="text-right" column sm={4}>
                     Panjang
                   </Form.Label>
-                  <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Panjang" value={viewHewan.length} />
+                  <Col sm={1}>
+                    <Form.Control plaintext className="text-right" readOnly placeholder="Panjang" value={viewHewan.length.toLocaleString().replace(',', '.')} />
                   </Col>
+                  <Form.Label className="text-left" column sm={1}>
+                    cm
+                  </Form.Label>
 
                   <Form.Label className="text-right" column sm={2}>
                     Jenis Ras
@@ -706,104 +819,10 @@ export default function Home() {
             </Tab>
 
             {/* PROSES DAGING */}
-            <Tab eventKey="prosesDaging" title="Proses Daging">
-              <Form className="mt-5">
-                <Form.Group as={Row} controlId="formDaging">
-                  <Form.Label column sm="4" className="text-right">
-                    id Hewan ternak
-                  </Form.Label>
-                  <Col sm="4">
-                    <Form.Control
-                      as="select"
-                      placeholder="hewan ternak"
-                      name="idHewan"
-                      onChange={(e) => getHewanDetail(e.target.value)}
-                      // onChange={handleBeratBadan}
-                      value={viewHewan.id}
-                    >
-                      <option hidden>Pilih Hewan</option>
-                      {selectHewan ?
-                        selectHewan.map((item) => {
-                          return (<option value={item.id}>{item.name} - {item.earTag}</option>)
-                        }) : ''
-                      }
-                    </Form.Control>
-                  </Col>
-                </Form.Group>
+            {user.role == '1' ? (<Tab eventKey="prosesDaging" title="Proses Daging">
+              <ProsesDaging getHewanDetail={getHewanDetail} viewHewan={viewHewan} ras={ras} selectHewan={selectHewan} />
+            </Tab>) : ''}
 
-                <Form.Group as={Row} controlId="formDaging">
-                  <Form.Label className="text-right" column sm={4}>
-                    Berat
-                  </Form.Label>
-                  <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Berat" value={viewHewan.weight} />
-                  </Col>
-
-                  <Form.Label className="text-right" column sm={2}>
-                    Umur
-                  </Form.Label>
-                  <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Umur" value={convertMoment(viewHewan.dob)} />
-                  </Col>
-                </Form.Group>
-
-                <Form.Group as={Row} controlId="formDaging">
-                  <Form.Label className="text-right" column sm={4}>
-                    Lingkar Dada
-                  </Form.Label>
-                  <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Lingkar Dada" value={viewHewan.heartGrith} />
-                  </Col>
-
-                  <Form.Label className="text-right" column sm={2}>
-                    Kelamin
-                  </Form.Label>
-                  <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Kelamin" value={viewHewan.gender ? 'Jantan' : 'Betina'} />
-                  </Col>
-                </Form.Group>
-
-                <Form.Group as={Row} controlId="formDaging">
-                  <Form.Label className="text-right" column sm={4}>
-                    Panjang
-                  </Form.Label>
-                  <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Panjang" value={viewHewan.length} />
-                  </Col>
-
-                  <Form.Label className="text-right" column sm={2}>
-                    Jenis Ras
-                  </Form.Label>
-                  <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Ras" value={ras.item[viewHewan.race].label} />
-                  </Col>
-                </Form.Group>
-
-                <Form.Group as={Row} controlId="formDaging">
-                  <Form.Label className="text-right" column sm={4}>
-                    Address Pengirim
-                  </Form.Label>
-                  <Col sm={4}>
-                    <Form.Control type="text" readOnly placeholder="Address Pengirim" value={contract.accounts[0]} />
-                  </Col>
-                </Form.Group>
-
-                <Form.Group as={Row} controlId="formDaging">
-                  <Form.Label className="text-right" column sm={4}>
-                    Address RPH
-                  </Form.Label>
-                  <Col sm={4}>
-                    <Form.Control type="text" placeholder="Address RPH" onChange={(e) => handleAddressTo(e)} />
-                  </Col>
-                </Form.Group>
-
-                <Form.Group as={Row}>
-                  <Col sm={{ span: 7, offset: 2 }}>
-                    <Button className="float-right" type="submit" onClick={(e) => { e.preventDefault(); registerBeef(viewHewan._id, viewHewan.id, addressTo, viewHewan.dob) }}>Kirim</Button>
-                  </Col>
-                </Form.Group>
-              </Form>
-            </Tab>
 
             {/* BERAT BADAN */}
             <Tab eventKey="beratBadan" title="Berat Badan">
@@ -836,9 +855,13 @@ export default function Home() {
                   <Form.Label className="text-right" column sm={4}>
                     Berat
                   </Form.Label>
-                  <Col sm={2}>
-                    <Form.Control type="number" name="weightb" onChange={(e) => handleWeightRecord(e)} placeholder="Berat" value={viewHewan.weight} />
+                  <Col sm={1}>
+                    {/* <NumberFormat value={viewHewan.weight} thousandSeparator='.' decimalSeparator=',' /> */}
+                    <Form.Control className="text-right" type="number" name="weightb" onChange={(e) => handleWeightRecord(e)} placeholder="Berat" value={viewHewan.weight} />
                   </Col>
+                  <Form.Label className="text-left" column sm={1}>
+                    kg
+                  </Form.Label>
 
                   <Form.Label className="text-right" column sm={2}>
                     Umur
@@ -852,9 +875,12 @@ export default function Home() {
                   <Form.Label className="text-right" column sm={4}>
                     Lingkar Dada
                   </Form.Label>
-                  <Col sm={2}>
-                    <Form.Control type="number" name="heartGrithb" onChange={(e) => handleWeightRecord(e)} placeholder="Lingkar Dada" value={viewHewan.heartGrith} />
+                  <Col sm={1}>
+                    <Form.Control className="text-right" type="number" name="heartGrithb" onChange={(e) => handleWeightRecord(e)} placeholder="Lingkar Dada" value={viewHewan.heartGrith} />
                   </Col>
+                  <Form.Label className="text-left" column sm={1}>
+                    cm
+                  </Form.Label>
 
                   <Form.Label className="text-right" column sm={2}>
                     Kelamin
@@ -868,9 +894,12 @@ export default function Home() {
                   <Form.Label className="text-right" column sm={4}>
                     Panjang
                   </Form.Label>
-                  <Col sm={2}>
-                    <Form.Control type="number" name="lengthb" onChange={(e) => handleWeightRecord(e)} placeholder="Panjang" value={viewHewan.length} />
+                  <Col sm={1}>
+                    <Form.Control className="text-right" type="number" name="lengthb" onChange={(e) => handleWeightRecord(e)} placeholder="Panjang" value={viewHewan.length} />
                   </Col>
+                  <Form.Label className="text-left" column sm={1}>
+                    cm
+                  </Form.Label>
 
                   <Form.Label className="text-right" column sm={2}>
                     Jenis Ras
@@ -918,9 +947,12 @@ export default function Home() {
                   <Form.Label className="text-right" column sm={4}>
                     Berat
                   </Form.Label>
-                  <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Berat" value={viewHewan.weight} />
+                  <Col sm={1}>
+                    <Form.Control plaintext className="text-right" readOnly placeholder="Berat" value={viewHewan.weight.toLocaleString().replace(',', '.')} />
                   </Col>
+                  <Form.Label className="text-left" column sm={1}>
+                    kg
+                  </Form.Label>
 
                   <Form.Label className="text-right" column sm={2}>
                     Umur
@@ -934,9 +966,12 @@ export default function Home() {
                   <Form.Label className="text-right" column sm={4}>
                     Lingkar Dada
                   </Form.Label>
-                  <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Lingkar dada" value={viewHewan.heartGrith} />
+                  <Col sm={1}>
+                    <Form.Control plaintext className="text-right" readOnly placeholder="Lingkar dada" value={viewHewan.heartGrith.toLocaleString().replace(',', '.')} />
                   </Col>
+                  <Form.Label className="text-left" column sm={1}>
+                    cm
+                  </Form.Label>
 
                   <Form.Label className="text-right" column sm={2}>
                     Kelamin
@@ -950,9 +985,12 @@ export default function Home() {
                   <Form.Label className="text-right" column sm={4}>
                     Panjang
                   </Form.Label>
-                  <Col sm={2}>
-                    <Form.Control plaintext readOnly placeholder="Panjang" value={viewHewan.length} />
+                  <Col sm={1}>
+                    <Form.Control plaintext className="text-right" readOnly placeholder="Panjang" value={viewHewan.length.toLocaleString().replace(',', '.')} />
                   </Col>
+                  <Form.Label className="text-left" column sm={1}>
+                    cm
+                  </Form.Label>
 
                   <Form.Label className="text-right" column sm={2}>
                     Jenis Ras
@@ -1026,9 +1064,12 @@ export default function Home() {
                   <Form.Label className="text-right" column sm={4}>
                     Berat
                   </Form.Label>
-                  <Col sm={2}>
-                    <Form.Control plaintext readOnly name="weight" placeholder="Berat" value={viewHewan.weight} />
+                  <Col sm={1}>
+                    <Form.Control className="text-right" plaintext readOnly name="weight" placeholder="Berat" value={viewHewan.weight.toLocaleString().replace(',', '.')} />
                   </Col>
+                  <Form.Label className="text-left" column sm={1}>
+                    kg
+                  </Form.Label>
 
                   <Form.Label className="text-right" column sm={2}>
                     Umur
@@ -1042,9 +1083,12 @@ export default function Home() {
                   <Form.Label className="text-right" column sm={4}>
                     Lingkar Dada
                   </Form.Label>
-                  <Col sm={2}>
-                    <Form.Control plaintext readOnly name="heartGrith" placeholder="Berat" value={viewHewan.heartGrith} />
+                  <Col sm={1}>
+                    <Form.Control className="text-right" plaintext readOnly name="heartGrith" placeholder="Berat" value={viewHewan.heartGrith.toLocaleString().replace(',', '.')} />
                   </Col>
+                  <Form.Label className="text-left" column sm={1}>
+                    cm
+                  </Form.Label>
 
                   <Form.Label className="text-right" column sm={2}>
                     Kelamin
@@ -1058,9 +1102,12 @@ export default function Home() {
                   <Form.Label className="text-right" column sm={4}>
                     Panjang
                   </Form.Label>
-                  <Col sm={2}>
-                    <Form.Control plaintext readOnly name="length" placeholder="Panjang" value={viewHewan.length} />
+                  <Col sm={1}>
+                    <Form.Control className="text-right" plaintext readOnly name="length" placeholder="Panjang" value={viewHewan.length.toLocaleString().replace(',', '.')} />
                   </Col>
+                  <Form.Label className="text-left" column sm={1}>
+                    cm
+                  </Form.Label>
 
                   <Form.Label className="text-right" column sm={2}>
                     Jenis Ras
@@ -1096,14 +1143,29 @@ export default function Home() {
                   <Form.Label className="text-right" column sm={4}>
                     Jumlah Pangan
                   </Form.Label>
-                  <Col sm={2}>
-                    <Form.Control type="number" name="feedAmount" onChange={(e) => handleFeed(e)} placeholder="" value={viewHewan.feedAmount} />
+                  <Col sm={1}>
+                    <Form.Control className="text-right" type="number" name="feedAmount" onChange={(e) => handleFeed(e)} placeholder="" value={viewHewan.feedAmount} />
+                  </Col>
+                  <Col sm={1}>
+                    <Form.Control
+                      as="select"
+                      placeholder="hewan ternak"
+                      name="feedMeasurement"
+                      onChange={(e) => handleFeed(e)}
+                      value={viewHewan.feedMeasurement}
+                    >
+                      {feedMeasurement.item ?
+                        feedMeasurement.item.map((item) => {
+                          return (<option value={item.enum}>{item.label}</option>)
+                        }) : ''
+                      }
+                    </Form.Control>
                   </Col>
                 </Form.Group>
 
                 <Form.Group as={Row}>
                   <Col sm={{ span: 7, offset: 2 }}>
-                    <Button className="float-right" type="submit" onClick={(e) => { e.preventDefault(); addFeedRecord(viewHewan._id, viewHewan.id, viewHewan.feedType, viewHewan.feedAmount) }}>Kirim</Button>
+                    <Button className="float-right" type="submit" onClick={(e) => { e.preventDefault(); addFeedRecord(viewHewan._id, viewHewan.id, viewHewan.feedType, viewHewan.feedAmount, viewHewan.feedMeasurement) }}>Kirim</Button>
                   </Col>
                 </Form.Group>
               </Form>

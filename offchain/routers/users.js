@@ -71,17 +71,21 @@ router.route('/activate/:address').patch((req, res) => {
 });
 
 router.route('/toggle/:address').patch((req, res) => {
+  var status = 'tidak aktif';
   User.findOne({ address: req.params.address }).then((user) => {
-    if (user.status == Number(1)) {
-      user.status = Number(0);
-    } else if (user.status == Number(0)) {
-      user.status = Number(1)
+    console.log('toggle')
+    if (user.status === Number(0)) {
+      user.status = Number(1);
+      status = 'aktif';
+    } else if (user.status === Number(1)) {
+      user.status = Number(0)
+      status = 'tidak aktif'
     }
     user.txHash = req.body.txHash;
 
     user
       .save()
-      .then(() => res.json('User telah ditambahkan di jaringan blockchain!'))
+      .then(() => res.json(`address: ${req.params.address} \nBerhasil diubah menjadi ${status}.`))
       .catch((err) => res.status(400).json('Error: ' + err))
   })
 });

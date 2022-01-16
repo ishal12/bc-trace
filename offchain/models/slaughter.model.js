@@ -22,7 +22,7 @@ const slaughterSchema = new Schema(
         },
         status: {
             type: String,
-            enum: ['produktif', 'bunting', 'lainnya', 'diterima', 'antemortem', 'postmortem', 'diproses'],
+            enum: ['produktif', 'bunting', 'lainnya', 'diterima', 'antemortem', 'postmortem', 'diproses', 'packing'],
             required: true,
         },
         txAnte: {

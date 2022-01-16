@@ -8,11 +8,19 @@ import 'moment/locale/id'
 import ReactPaginate from 'react-paginate'
 import '../../../assets/css/pagination.css'
 import { ContractContext } from '../../../context/contractContext';
+import AlertBox from '../../layout/alertBox';
 
 export default function TablePengguna(props) {
   const [loading, setLoading] = useState(false);
   const { contract, setContract } = useContext(ContractContext);
   const [users, setUsers] = useState([]);
+
+  const [alertBox, setAlertBox] = useState({
+    show: false,
+    variant: 'danger',
+    head: '',
+    body: '',
+  })
 
   const [pagination, setPagination] = useState({
     offset: 0,
@@ -47,7 +55,20 @@ export default function TablePengguna(props) {
           })
           .then((res) => {
             console.log(res.data)
-            window.location.reload()
+            setAlertBox({
+              variant: 'success',
+              head: 'Berhasil mengubah akun.',
+              body: '' + res.data,
+              show: true,
+            })
+          })
+          .catch((err) => {
+            setAlertBox({
+              variant: 'danger',
+              head: 'Error',
+              body: '' + err,
+              show: true,
+            })
           })
 
       });
@@ -104,6 +125,7 @@ export default function TablePengguna(props) {
         subContainerClassName={"pages pagination"}
         activeClassName={"active"}
       />
+      <AlertBox body={alertBox.body} head={alertBox.head} variant={alertBox.variant} show={alertBox.show} />
     </>
   )
 }

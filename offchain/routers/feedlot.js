@@ -14,12 +14,14 @@ router.route('/add').post((req, res) => {
   const id = req.body.address;
   const foodType = req.body.name;
   const amount = req.body.amount;
+  const measurement = req.body.measurement;
   const actor = req.body.actor;
 
   const newFood = new Feed({
     id,
     foodType,
     amount,
+    measurement,
     actor,
   });
 

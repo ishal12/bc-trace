@@ -72,9 +72,9 @@ export default function TableBeratBadan(props) {
             return (
               <tr>
                 <td>{props.convertMomentDate(item.weightR.timeRecord)}</td>
-                <td>{item.weightR.weight}</td>
-                <td>{item.weightR.heartGrith}</td>
-                <td>{item.weightR.length}</td>
+                <td>{item.weightR.weight} kg</td>
+                <td>{item.weightR.heartGrith} cm</td>
+                <td>{item.weightR.length} cm</td>
                 <td>{item.actor.name}</td>
               </tr>
             )

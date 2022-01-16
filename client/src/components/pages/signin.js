@@ -4,10 +4,18 @@ import { Form, Button, Row, Card, Col } from 'react-bootstrap'
 import { ContractContext } from '../../context/contractContext'
 import axios from 'axios'
 import { UserContext } from '../../context/userContext'
+import AlertBox from '../layout/alertBox';
 
 export default function Signin() {
   const { contract, setContract } = useContext(ContractContext);
   const { user, setUser } = useContext(UserContext);
+
+  const [alertBox, setAlertBox] = useState({
+    show: false,
+    variant: 'danger',
+    head: '',
+    body: '',
+  })
 
   const [submitted, setSubmitted] = useState(false);
   const [users, setUsers] = useState({
@@ -21,7 +29,23 @@ export default function Signin() {
     setSubmitted(true);
     axios
       .post('http://localhost:3001/users/add', users)
-      .then((res) => console.log(res.data))
+      .then((res) => {
+        console.log(res.data)
+        setAlertBox({
+          variant: 'success',
+          head: 'Berhasil Menambahkan Akun',
+          body: 'Akun berhasil ditambahkan, menunggu konfirmasi dari Admin.',
+          show: true,
+        })
+      })
+      .catch((err) => {
+        setAlertBox({
+          variant: 'danger',
+          head: 'Error',
+          body: '' + err,
+          show: true,
+        })
+      })
     // console.log(user);
   }
 
@@ -51,7 +75,8 @@ export default function Signin() {
 
   useEffect(() => {
     setUsers({ address: contract.accounts[0] });
-  }, [contract])
+    console.log(alertBox)
+  }, [contract, alertBox])
 
   return (
     <>
@@ -97,6 +122,7 @@ export default function Signin() {
           </Card.Body>
         </Card>
       </Row>
+      <AlertBox body={alertBox.body} head={alertBox.head} variant={alertBox.variant} show={alertBox.show} />
     </>
   )
 }
