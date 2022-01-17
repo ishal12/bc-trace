@@ -40,10 +40,11 @@ router.get('/wRecord/:id', async (req, res) => {
   const web3 = new Web3(Web3.givenProvider || 'http://127.0.0.1:8545');
   const deployedNetwork = SlaughterManager.networks[5777];
   var contract = new web3.eth.Contract(SlaughterManager.abi, deployedNetwork.address);
-  var data = [];
+  var record = [];
   const id = parseInt(req.params.id - 1);
   try {
     const ls = await contract.methods.livestocks(id).call();
+    const count = ls.wrCount;
     var offsetFor = ls.wrCount - (1 + offset);
     var perPageFor = offsetFor - (perPage - 1);
 
@@ -54,9 +55,9 @@ router.get('/wRecord/:id', async (req, res) => {
     for (var i = offsetFor; i >= perPageFor; i--) {
       const weightR = await contract.methods.wRecords(id, i).call();
       const actor = await contract.methods.users(weightR.actor).call();
-      data.push({ weightR, actor });
+      record.push({ weightR, actor });
     }
-    res.json(data);
+    res.json({ record, count });
   } catch (e) {
     res.json(e);
   }
@@ -73,6 +74,7 @@ router.get('/hRecord/:id', async (req, res) => {
   const id = parseInt(req.params.id - 1);
   try {
     const ls = await contract.methods.livestocks(id).call();
+    const count = ls.hrCount;
     var offsetFor = ls.hrCount - (1 + offset);
     var perPageFor = offsetFor - (perPage - 1);
 
@@ -85,7 +87,7 @@ router.get('/hRecord/:id', async (req, res) => {
       const actor = await contract.methods.users(healthR.actor).call();
       hr.push({ healthR, actor });
     }
-    res.json(hr);
+    res.json({ hr, count });
   } catch (e) {
     res.json(e);
   }
@@ -147,6 +149,7 @@ router.get('/transfer/:id', async (req, res) => {
   const id = parseInt(req.params.id - 1);
   try {
     const ls = await contract.methods.livestocks(id).call();
+    const count = ls.transferCount;
     var offsetFor = ls.transferCount - (1 + offset);
     var perPageFor = offsetFor - (perPage - 1);
 
@@ -160,7 +163,7 @@ router.get('/transfer/:id', async (req, res) => {
       (owner.timeCreated != '0') ? transfer.push({ owner, key: i }) : console.log('Tidak masuk');
 
     }
-    res.json(transfer);
+    res.json({ transfer, count });
   } catch (e) {
     res.json(e);
   }

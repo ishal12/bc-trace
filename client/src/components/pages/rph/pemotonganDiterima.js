@@ -59,7 +59,10 @@ export default function PemotonganDiterima(props) {
   const getHewan = () => {
     axios
       .get(`http://localhost:3001/slaughters/diterima/${contract.accounts}?offset=${pagination.offset}&perPage=${pagination.perPage}`)
-      .then((res) => setLivestocks(res.data))
+      .then((res) => {
+        setLivestocks(res.data.slaughter)
+        setPagination({ ...pagination, pageCount: res.data.count / 2 });
+      })
   }
 
   const dateConvert = (date) => {
@@ -68,7 +71,7 @@ export default function PemotonganDiterima(props) {
 
   useEffect(() => {
     getHewan()
-  }, [contract, pagination])
+  }, [contract, pagination.currentPage])
 
   return (
     <>
@@ -96,7 +99,7 @@ export default function PemotonganDiterima(props) {
                 <td className='text-right'>{item._livestock.heartGrith.toLocaleString().replace(',', '.')} cm</td>
                 <td className='text-right'>{item._livestock.length.toLocaleString().replace(',', '.')} cm</td>
                 <td>{item._livestock.gender ? 'Jantan' : 'Betina'}</td>
-                <td>{item.age} Hari</td>
+                <td className='text-right'>{item.age} Hari</td>
                 <td>{dateConvert(item.updatedAt)}</td>
                 <td className="text-center">
                   <Button as="input" className="mr-3" type="button" value="Lihat" onClick={(e) => props.handleShow(e, item)} />

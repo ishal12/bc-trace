@@ -47,12 +47,15 @@ export default function TableKesehatan(props) {
   const getKesehatan = () => {
     axios
       .get(`http://localhost:3001/blockchains/hRecord/${props.id}?offset=${pagination.offset}&perPage=${pagination.perPage}`)
-      .then((res) => setHRecord(res.data))
+      .then((res) => {
+        setHRecord(res.data.hr)
+        setPagination({ ...pagination, pageCount: res.data.count / 2 });
+      })
   }
 
   useEffect(() => {
     getKesehatan()
-  }, [pagination])
+  }, [pagination.currentPage])
 
   return (
     <>

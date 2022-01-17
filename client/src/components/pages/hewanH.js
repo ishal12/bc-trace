@@ -60,12 +60,15 @@ export default function HewanH() {
   const getHewan = () => {
     axios
       .get(`http://localhost:3001/livestocks/?offset=${pagination.offset}&perPage=${pagination.perPage}`)
-      .then((res) => setLivestocks(res.data))
+      .then((res) => {
+        setLivestocks(res.data.livestocks)
+        setPagination({ ...pagination, pageCount: res.data.count / 2 })
+      })
   }
 
   useEffect(() => {
     getHewan()
-  }, [pagination])
+  }, [pagination.currentPage])
 
   return (
     <>
@@ -100,11 +103,11 @@ export default function HewanH() {
                     return (<tr>
                       <td>{item.name}</td>
                       <td>{raceType[item.race].label}</td>
-                      <td>{item.weight}</td>
-                      <td>{item.heartGrith}</td>
-                      <td>{item.length}</td>
+                      <td className="text-right">{item.weight.toLocaleString().replace(',', '.')} kg</td>
+                      <td className="text-right">{item.heartGrith.toLocaleString().replace(',', '.')} cm</td>
+                      <td className="text-right">{item.length.toLocaleString().replace(',', '.')} cm</td>
                       <td>{item.gender ? 'Jantan' : 'Betina'}</td>
-                      <td>{convertMoment(item.birth)}</td>
+                      <td className="text-right">{convertMoment(item.birth)}</td>
                       <td className="text-center">
                         <Link to={location => `/hewan/detail/${item.id}`} >
                           <Button as="input" className="mr-3" type="button" value="Lihat" />

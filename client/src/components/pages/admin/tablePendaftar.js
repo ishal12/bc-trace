@@ -78,12 +78,15 @@ export default function TablePangan(props) {
   const getPendaftar = () => {
     axios
       .get(`http://localhost:3001/users/process/?offset=${pagination.offset}&perPage=${pagination.perPage}`)
-      .then((res) => setUsers(res.data))
+      .then((res) => {
+        setUsers(res.data.users)
+        setPagination({ ...pagination, pageCount: res.data.count / 2 })
+      })
   }
 
   useEffect(() => {
     getPendaftar()
-  }, [pagination])
+  }, [pagination.currentPage])
 
   return (
     <>

@@ -41,12 +41,15 @@ export default function TableTransfer(props) {
   const getTransfer = () => {
     axios
       .get(`http://localhost:3001/blockchains/transfer/${props.id}?offset=${pagination.offset}&perPage=${pagination.perPage}`)
-      .then((res) => setTransfer(res.data))
+      .then((res) => {
+        setTransfer(res.data.transfer)
+        setPagination({ ...pagination, pageCount: res.data.count / 2 });
+      })
   }
 
   useEffect(() => {
     getTransfer()
-  }, [pagination])
+  }, [pagination.currentPage])
 
   return (
     <>

@@ -31,7 +31,10 @@ router.route('/:address').get((req, res) => {
 
     Slaughter.find({ addressRPH: req.params.address, status: { $in: ['diproses', 'diterima', 'antemortem', 'postmortem'] } }).skip(offset).limit(perPage)
         .populate('_livestock')
-        .then((slaughter) => res.json(slaughter))
+        .then((slaughter) => {
+            Slaughter.countDocuments({ addressRPH: req.params.address, status: { $in: ['diproses', 'diterima', 'antemortem', 'postmortem'] } })
+                .then((count) => res.json({ slaughter, count }));
+        })
         .catch((err) => res.status(400).json('Error: ' + err));
 });
 
@@ -41,7 +44,10 @@ router.route('/ditolak/:address').get((req, res) => {
 
     Slaughter.find({ addressRPH: req.params.address, status: { $in: ['produktif', 'bunting', 'lainnya'] } }).skip(offset).limit(perPage)
         .populate('_livestock')
-        .then((slaughter) => res.json(slaughter))
+        .then((slaughter) => {
+            Slaughter.countDocuments({ addressRPH: req.params.address, status: { $in: ['produktif', 'bunting', 'lainnya'] } })
+                .then((count) => res.json({ slaughter, count }));
+        })
         .catch((err) => res.status(400).json('Error: ' + err));
 });
 
@@ -51,7 +57,10 @@ router.route('/diterima/:address').get((req, res) => {
 
     Slaughter.find({ addressRPH: req.params.address, status: { $in: ['diterima', 'postmortem', 'packing'] } }).skip(offset).limit(perPage)
         .populate('_livestock')
-        .then((slaughter) => res.json(slaughter))
+        .then((slaughter) => {
+            Slaughter.countDocuments({ addressRPH: req.params.address, status: { $in: ['diterima', 'postmortem', 'packing'] } })
+                .then((count) => res.json({ slaughter, count }));
+        })
         .catch((err) => res.status(400).json('Error: ' + err));
 });
 

@@ -48,12 +48,15 @@ export default function TableBeratBadan(props) {
   const getWRecord = () => {
     axios
       .get(`http://localhost:3001/blockchains/wRecord/${props.id}?offset=${pagination.offset}&perPage=${pagination.perPage}`)
-      .then((res) => setWRecord(res.data))
+      .then((res) => {
+        setWRecord(res.data.record)
+        setPagination({ ...pagination, pageCount: res.data.count / 2 });
+      })
   }
 
   useEffect(() => {
     getWRecord()
-  }, [pagination])
+  }, [pagination.currentPage])
 
   return (
     <>
@@ -72,9 +75,9 @@ export default function TableBeratBadan(props) {
             return (
               <tr>
                 <td>{props.convertMomentDate(item.weightR.timeRecord)}</td>
-                <td>{item.weightR.weight} kg</td>
-                <td>{item.weightR.heartGrith} cm</td>
-                <td>{item.weightR.length} cm</td>
+                <td className='text-right'>{item.weightR.weight.toLocaleString().replace(',', '.')} kg</td>
+                <td className='text-right'>{item.weightR.heartGrith.toLocaleString().replace(',', '.')} cm</td>
+                <td className='text-right'>{item.weightR.length.toLocaleString().replace(',', '.')} cm</td>
                 <td>{item.actor.name}</td>
               </tr>
             )

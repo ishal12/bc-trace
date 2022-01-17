@@ -85,7 +85,10 @@ router.route('/feedRecord/:id').get((req, res) => {
 
   Feed.find({ id: req.params.id }).skip(offset).limit(perPage)
     .populate('_livestock')
-    .then((feed) => res.json(feed))
+    .then((feed) => {
+      Feed.countDocuments({ id: req.params.id })
+        .then((count) => res.json({ feed, count }));
+    })
     .catch((err) => res.status(400).json('Error: ' + err));
 });
 
@@ -161,7 +164,10 @@ router.route('/').get((req, res) => {
   const perPage = Number(req.query.perPage);
 
   Livestock.find().skip(offset).limit(perPage)
-    .then((livestocks) => res.json(livestocks))
+    .then((livestocks) => {
+      Livestock.countDocuments({})
+        .then((count) => res.json({ livestocks, count }));
+    })
     .catch((err) => res.status(400).json('Error: ' + err));
 })
 

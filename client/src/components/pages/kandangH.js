@@ -13,6 +13,7 @@ export default function KandangH() {
     _id: "",
     address: "",
     name: "",
+    totalLivestock: 0,
     role: 0,
     status: 0,
   }])
@@ -51,12 +52,15 @@ export default function KandangH() {
   const getKandang = () => {
     axios
       .get(`http://localhost:3001/users/home/?offset=${pagination.offset}&perPage=${pagination.perPage}`)
-      .then((res) => setKandangs(res.data))
+      .then((res) => {
+        setKandangs(res.data.users)
+        setPagination({ ...pagination, pageCount: res.data.count / 2 })
+      })
   }
 
   useEffect(() => {
     getKandang()
-  }, [pagination])
+  }, [pagination.currentPage])
 
   return (
     <>
@@ -89,7 +93,7 @@ export default function KandangH() {
                     return (<tr>
                       <td>{item.name}</td>
                       <td>{item.address}</td>
-                      <td>{item.totalLivestock}</td>
+                      <td className='text-right'>{item.totalLivestock.toLocaleString().replace(',', '.')}</td>
                       <td>{roleType[item.role].label}</td>
                       <td>{statusType[item.status].label}</td>
                       <td className="text-center">

@@ -77,12 +77,15 @@ export default function TablePengguna(props) {
   const getPengguna = () => {
     axios
       .get(`http://localhost:3001/users/activated/?offset=${pagination.offset}&perPage=${pagination.perPage}`)
-      .then((res) => setUsers(res.data))
+      .then((res) => {
+        setUsers(res.data.users)
+        setPagination({ ...pagination, pageCount: res.data.count / 2 })
+      })
   }
 
   useEffect(() => {
     getPengguna()
-  }, [pagination])
+  }, [pagination.currentPage])
 
   return (
     <>

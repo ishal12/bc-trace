@@ -6,7 +6,10 @@ router.route('/process/').get((req, res) => {
   const perPage = Number(req.query.perPage);
 
   User.find({ status: { $in: ['2'] } }).skip(offset).limit(perPage)
-    .then((users) => res.json(users))
+    .then((users) => {
+      User.countDocuments({ status: { $in: ['2'] } })
+        .then((count) => res.json({ users, count }));
+    })
     .catch((err) => res.status(400).json('Error: ' + err));
 });
 
@@ -15,7 +18,10 @@ router.route('/activated/').get((req, res) => {
   const perPage = Number(req.query.perPage);
 
   User.find({ status: { $in: ['0', '1'] } }).skip(offset).limit(perPage)
-    .then((users) => res.json(users))
+    .then((users) => {
+      User.countDocuments({ status: { $in: ['0', '1'] } })
+        .then((count) => res.json({ users, count }));
+    })
     .catch((err) => res.status(400).json('Error: ' + err));
 });
 
@@ -24,7 +30,10 @@ router.route('/home/').get((req, res) => {
   const perPage = Number(req.query.perPage);
 
   User.find({ role: { $in: ['0', '1'] }, status: { $in: ['0', '1'] } }).skip(offset).limit(perPage)
-    .then((users) => res.json(users))
+    .then((users) => {
+      User.countDocuments({ role: { $in: ['0', '1'] }, status: { $in: ['0', '1'] } })
+        .then((count) => res.json({ users, count }));
+    })
     .catch((err) => res.status(400).json('Error: ' + err));
 });
 

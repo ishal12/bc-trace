@@ -40,12 +40,15 @@ export default function TablePangan(props) {
   const getFeed = () => {
     axios
       .get(`http://localhost:3001/livestocks/feedRecord/${props.id}?offset=${pagination.offset}&perPage=${pagination.perPage}`)
-      .then((res) => setFeed(res.data))
+      .then((res) => {
+        setFeed(res.data.feed)
+        setPagination({ ...pagination, pageCount: res.data.count / 2 })
+      })
   }
 
   useEffect(() => {
     getFeed()
-  }, [pagination])
+  }, [pagination.currentPage])
 
   return (
     <>
@@ -64,7 +67,7 @@ export default function TablePangan(props) {
               <tr>
                 <td>{item.createdAt}</td>
                 <td>{item.feedType}</td>
-                <td>{item.amount} {item.measurement}</td>
+                <td className='text-right'>{item.amount.toLocaleString().replace(',', '.')} {item.measurement}</td>
                 <td>{item.actor}</td>
               </tr>
             )

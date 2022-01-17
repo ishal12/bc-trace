@@ -337,7 +337,10 @@ export default function RPH() {
 
     axios
       .get(`http://localhost:3001/slaughters/${contract.accounts}?offset=${pagination.offset}&perPage=${pagination.perPage}`)
-      .then((res) => setLivestocks(res.data))
+      .then((res) => {
+        setLivestocks(res.data.slaughter)
+        setPagination({ ...pagination, pageCount: res.data.count / 2 });
+      })
   }
 
   const handlePageClick = (e) => {

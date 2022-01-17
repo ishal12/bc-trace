@@ -59,12 +59,15 @@ export default function PemotonganDitolak(props) {
   const getHewan = () => {
     axios
       .get(`http://localhost:3001/slaughters/ditolak/${contract.accounts}?offset=${pagination.offset}&perPage=${pagination.perPage}`)
-      .then((res) => setLivestocks(res.data))
+      .then((res) => {
+        setLivestocks(res.data.slaughter)
+        setPagination({ ...pagination, pageCount: res.data.count / 2 });
+      })
   }
 
   useEffect(() => {
     getHewan()
-  }, [contract, pagination])
+  }, [contract, pagination.currentPage])
 
   return (
     <>
@@ -91,8 +94,8 @@ export default function PemotonganDitolak(props) {
                 <td className='text-right'>{item._livestock.weight.toLocaleString().replace(',', '.')} kg</td>
                 <td className='text-right'>{item._livestock.heartGrith.toLocaleString().replace(',', '.')} cm</td>
                 <td className='text-right'>{item._livestock.length.toLocaleString().replace(',', '.')} cm</td>
-                <td className='text-right'>{item._livestock.gender ? 'Jantan' : 'Betina'}</td>
-                <td>{item.age} Hari</td>
+                <td>{item._livestock.gender ? 'Jantan' : 'Betina'}</td>
+                <td className='text-right'>{item.age} Hari</td>
                 <td>{item.status}</td>
                 <td className="text-center">
                   <Button as="input" className="mr-3" type="button" value="Lihat" onClick={(e) => props.handleShow(e, item)} />
