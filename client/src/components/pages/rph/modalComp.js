@@ -422,7 +422,7 @@ function Lihat(props) {
               Umur
             </Form.Label>
             <Col sm="2">
-              <Form.Control className="text-center" type="number" name="age" plaintext readOnly value={props.viewHewan.dob} min={0} placeholder="Umur" />
+              <Form.Control className="text-right" type="number" name="age" plaintext readOnly value={props.viewHewan.dob} min={0} placeholder="Umur" />
             </Col>
             <Form.Label column sm="2">
               Hari
@@ -434,7 +434,7 @@ function Lihat(props) {
             Berat
           </Form.Label>
           <Col sm="2">
-            <Form.Control className="text-center" type="number" name="weight" plaintext readOnly value={props.viewHewan.weight} min={0} placeholder="Berat" />
+            <Form.Control className="text-right" type="number" name="weight" plaintext readOnly value={props.viewHewan.weight.toLocaleString().replace(',', '.')} min={0} placeholder="Berat" />
           </Col>
           <Form.Label column sm="2">
             kg
@@ -445,7 +445,7 @@ function Lihat(props) {
             Lingkar dada
           </Form.Label>
           <Col sm="2">
-            <Form.Control className="text-center" type="number" min={0} name="heartGrith" plaintext readOnly value={props.viewHewan.heartGrith} placeholder="Tinggi" />
+            <Form.Control className="text-right" type="number" min={0} name="heartGrith" plaintext readOnly value={props.viewHewan.heartGrith.toLocaleString().replace(',', '.')} placeholder="Tinggi" />
           </Col>
           <Form.Label column sm="3">
             cm
@@ -456,7 +456,7 @@ function Lihat(props) {
             Panjang
           </Form.Label>
           <Col sm="2">
-            <Form.Control className="text-center" type="number" min={0} name="length" plaintext readOnly value={props.viewHewan.length} placeholder="Lebar" />
+            <Form.Control className="text-right" type="number" min={0} name="length" plaintext readOnly value={props.viewHewan.length.toLocaleString().replace(',', '.')} placeholder="Lebar" />
           </Col>
           <Form.Label column sm="2">
             cm

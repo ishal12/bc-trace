@@ -272,7 +272,15 @@ export default function Home() {
             address: contract.accounts[0],
           })
           .then((res) => {
-            console.log(res.data)
+            console.log(res.data.body)
+            axios
+              .post(`http://localhost:3001/livestocks/transfer/add/${res.data.after.id}`, {
+                _livestock: res.data.after._id,
+                addressTo: contract.accounts[0],
+                addressFrom: 'Pemilik Pertama',
+                txHash: receipt.transactionHash,
+              })
+              .then((resA) => console.log(resA.data))
             setAlertBox({
               variant: 'success',
               head: 'Berhasil menambahkan hewan ternak',
@@ -367,16 +375,25 @@ export default function Home() {
 
   }
 
-  const transferLivestock = (_id, _from, _to) => {
+  const transferLivestock = (_id, _from, _to, _livestock) => {
+    console.log(_livestock)
     contract.contracts.methods.transfer(_id, _from, _to)
       .send({ from: contract.accounts[0] })
       .on('receipt', (receipt) => {
         axios
           .patch(`http://localhost:3001/livestocks/transfer/${_id}`, {
             addressTo: _to,
+            address: _from,
           })
           .then((res) => {
-            console.log(res.data)
+            axios
+              .post(`http://localhost:3001/livestocks/transfer/add/${_id}`, {
+                _livestock: _livestock,
+                addressTo: _to,
+                addressFrom: _from,
+                txHash: receipt.transactionHash,
+              })
+              .then((resA) => console.log(resA.data))
             setAlertBox({
               variant: 'success',
               head: 'Berhasil mengirimkan hewan ternak',
@@ -594,7 +611,7 @@ export default function Home() {
               Berat
             </Form.Label>
             <Col sm="2">
-              <Form.Control type="number" name="weight" onChange={(e) => handleTambahHewan(e)} min={0} placeholder="Berat" />
+              <Form.Control className='text-right' type="number" name="weight" onChange={(e) => handleTambahHewan(e)} min={0} placeholder="Berat" />
             </Col>
             <Form.Label column sm="2">
               kg
@@ -605,7 +622,7 @@ export default function Home() {
               Lingkar dada
             </Form.Label>
             <Col sm="2">
-              <Form.Control type="number" min={0} name="heartGrith" onChange={(e) => handleTambahHewan(e)} placeholder="Tinggi" />
+              <Form.Control className='text-right' type="number" min={0} name="heartGrith" onChange={(e) => handleTambahHewan(e)} placeholder="Tinggi" />
             </Col>
             <Form.Label column sm="3">
               cm
@@ -616,7 +633,7 @@ export default function Home() {
               Panjang
             </Form.Label>
             <Col sm="2">
-              <Form.Control type="number" min={0} name="length" onChange={(e) => handleTambahHewan(e)} placeholder="Lebar" />
+              <Form.Control className='text-right' type="number" min={0} name="length" onChange={(e) => handleTambahHewan(e)} placeholder="Lebar" />
             </Col>
             <Form.Label column sm="2">
               cm
@@ -812,7 +829,7 @@ export default function Home() {
 
                 <Form.Group as={Row}>
                   <Col sm={{ span: 7, offset: 2 }}>
-                    <Button className="float-right" onClick={(e) => { e.preventDefault(); transferLivestock(viewHewan.id, contract.accounts[0], addressTo) }} type="submit">Kirim</Button>
+                    <Button className="float-right" onClick={(e) => { e.preventDefault(); transferLivestock(viewHewan.id, contract.accounts[0], addressTo, viewHewan._id) }} type="submit">Kirim</Button>
                   </Col>
                 </Form.Group>
               </Form>

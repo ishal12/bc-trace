@@ -75,9 +75,9 @@ export default function TableBeratBadan(props) {
             return (
               <tr>
                 <td>{props.convertMomentDate(item.weightR.timeRecord)}</td>
-                <td className='text-right'>{item.weightR.weight.toLocaleString().replace(',', '.')} kg</td>
-                <td className='text-right'>{item.weightR.heartGrith.toLocaleString().replace(',', '.')} cm</td>
-                <td className='text-right'>{item.weightR.length.toLocaleString().replace(',', '.')} cm</td>
+                <td className='text-right'>{Number(item.weightR.weight).toLocaleString().replace(',', '.')} kg</td>
+                <td className='text-right'>{Number(item.weightR.heartGrith).toLocaleString().replace(',', '.')} cm</td>
+                <td className='text-right'>{Number(item.weightR.length).toLocaleString().replace(',', '.')} cm</td>
                 <td>{item.actor.name}</td>
               </tr>
             )

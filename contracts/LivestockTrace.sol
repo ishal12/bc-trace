@@ -699,7 +699,11 @@ contract SlaughterManager is LivestockManager {
     ///   akan diubah menjadi beef.
     /// @param _id digunakan untuk mengetahui livestok yang akan diubah.
     /// @param _to digunakan untuk mengetahui tempat pemotongan livetock.
-    function registerBeef(uint256 _id, address _to) public onlyStocker {
+    function registerBeef(
+        uint256 _id,
+        address _to,
+        uint256 _epox
+    ) public onlyStocker {
         address owner = livestockOwner[_id - 1];
         require(owner == msg.sender, "Bukan pemilik.");
 
@@ -714,12 +718,14 @@ contract SlaughterManager is LivestockManager {
             "Hewan ternak memiliki proposal rph aktif."
         );
 
+        checkHealth(_id, _epox);
+
         uint256 newId = beefCount + 1;
 
         beefs[beefCount].beefId = newId;
         beefs[beefCount].lsId = _id;
         beefs[beefCount].slaughterHouse = _to;
-        beefs[beefCount].timeCreated = block.number;
+        beefs[beefCount].timeCreated = _epox;
         beefs[beefCount].timeUpdated = block.number;
 
         beefApproval[beefCount] = _to;
@@ -736,6 +742,22 @@ contract SlaughterManager is LivestockManager {
             _id,
             newId,
             "Pembuatan beef berhasil ditambahkan."
+        );
+    }
+
+    function checkHealth(uint256 _id, uint256 _epox) internal view {
+        Livestock storage _ls = livestocks[_id - 1];
+        require(_ls.status, "Hewan ternak tidak ada.");
+
+        HealthRecord storage _hr = hRecords[_id - 1][_ls.hrCount - 1];
+
+        require(!_hr.sick, "Hewan ternak sakit.");
+
+        uint256 math = _epox - _hr.timeRecord;
+
+        require(
+            math <= 604800000000,
+            "Keterangan sehat harus kurang dari seminggu."
         );
     }
 

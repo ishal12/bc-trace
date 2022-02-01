@@ -2,6 +2,7 @@ const router = require('express').Router();
 let Livestock = require("../models/livestock.model");
 let Feed = require("../models/feed.model")
 let User = require("../models/user.model")
+let Transfer = require("../models/transfer.model")
 
 router.route('/:address').get((req, res) => {
   const offset = Number(req.query.offset);
@@ -83,7 +84,7 @@ router.route('/feedRecord/:id').get((req, res) => {
   const offset = Number(req.query.offset);
   const perPage = Number(req.query.perPage);
 
-  Feed.find({ id: req.params.id }).skip(offset).limit(perPage)
+  Feed.find({ id: req.params.id }).sort({ '_id': -1 }).skip(offset).limit(perPage)
     .populate('_livestock')
     .then((feed) => {
       Feed.countDocuments({ id: req.params.id })
@@ -116,6 +117,60 @@ router.route('/transfer/:id').patch((req, res) => {
         .then(() => res.json('Kepemilikan berhasil dipindahkan'))
         .catch((err) => res.status(400).json('Error: ' + err))
     })
+});
+
+router.route('/transfer/add/:id').post((req, res) => {
+  User.findOne({ address: req.body.addressFrom })
+    .then((userFrom) => {
+      User.findOne({ address: req.body.addressTo })
+        .then((userTo) => {
+          var _from = '';
+          var _to = '';
+
+          if (userFrom !== null) {
+            if (userFrom.role == Number(0)) {
+              _from = 'farmer';
+            } else if (userFrom.role == Number(1)) {
+              _from = 'stocker';
+            }
+          }
+
+
+          if (userTo.role == Number(0)) {
+            _to = 'farmer';
+          } else if (userTo.role == Number(1)) {
+            _to = 'stocker';
+          }
+
+          const newTransfer = new Transfer({
+            id: req.params.id,
+            _livestock: req.body._livestock,
+            from: req.body.addressFrom,
+            to: req.body.addressTo,
+            stateFrom: _from,
+            stateTo: _to,
+            txHash: req.body.txHash
+          })
+          // res.json({ body: 'test', after: newTransfer })
+          newTransfer
+            .save()
+            .then(() => res.json('Riwayat transfer berhasil ditambahkan'))
+            .catch((err) => res.status(400).json('Error: ' + err))
+        }).catch((err) => res.status(400).json('Error: ' + err))
+    }).catch((err) => res.status(400).json('Error: ' + err))
+});
+
+router.route('/transfer/:id').get((req, res) => {
+  const offset = Number(req.query.offset);
+  const perPage = Number(req.query.perPage);
+
+  Transfer.find({ id: req.params.id }).sort({ '_id': -1 }).skip(offset).limit(perPage)
+    .populate('_livestock')
+    .then((transfer) => {
+      Transfer.countDocuments({ id: req.params.id })
+        .then((count) => res.json({ transfer, count }));
+    })
+    .catch((err) => res.status(400).json('Error: ' + err));
 });
 
 router.route('/add').post((req, res) => {
@@ -154,7 +209,7 @@ router.route('/add').post((req, res) => {
 
           user.save()
         })
-      res.json('Hewan Ternak telah ditambahkan!')
+      res.json({ body: 'Hewan Ternak telah ditambahkan!', after: newLS })
     })
     .catch((err) => res.status(400).json('Error: ' + err));
 });

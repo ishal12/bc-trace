@@ -22,11 +22,13 @@ const usersRouter = require('./routers/users');
 const livestocksRouter = require('./routers/livestocks');
 const slaughtersRouter = require('./routers/slaughters');
 const blockchainsRouter = require('./routers/blockchains');
+const reportsRouter = require('./routers/reports');
 
 app.use('/users', usersRouter);
 app.use('/livestocks', livestocksRouter);
 app.use('/slaughters', slaughtersRouter);
 app.use('/blockchains', blockchainsRouter);
+app.use('/reports', reportsRouter);
 
 app.listen(port, () => {
     console.log(`Server is running on port: ${port} `);

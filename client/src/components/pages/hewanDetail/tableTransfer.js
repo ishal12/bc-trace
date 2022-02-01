@@ -38,9 +38,18 @@ export default function TableTransfer(props) {
     });
   }
 
+  // const getTransfer = () => {
+  //   axios
+  //     .get(`http://localhost:3001/blockchains/transfer/${props.id}?offset=${pagination.offset}&perPage=${pagination.perPage}`)
+  //     .then((res) => {
+  //       setTransfer(res.data.transfer)
+  //       setPagination({ ...pagination, pageCount: res.data.count / 2 });
+  //     })
+  // }
+
   const getTransfer = () => {
     axios
-      .get(`http://localhost:3001/blockchains/transfer/${props.id}?offset=${pagination.offset}&perPage=${pagination.perPage}`)
+      .get(`http://localhost:3001/livestocks/transfer/${props.id}?offset=${pagination.offset}&perPage=${pagination.perPage}`)
       .then((res) => {
         setTransfer(res.data.transfer)
         setPagination({ ...pagination, pageCount: res.data.count / 2 });
@@ -53,7 +62,7 @@ export default function TableTransfer(props) {
 
   return (
     <>
-      <Table striped bordered hover>
+      {/* <Table striped bordered hover>
         <thead>
           <tr>
             <th>No</th>
@@ -70,6 +79,28 @@ export default function TableTransfer(props) {
                 <td>{item.owner.userAddress}</td>
                 <td>{item.owner.name}</td>
                 <td>{props.stateType[item.owner.role]}</td>
+              </tr>
+            )
+          }) : <tr><td colSpan={4}><center>Tidak ada Record</center></td></tr>}
+        </tbody>
+      </Table> */}
+      <Table striped bordered hover>
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Dari</th>
+            <th>Ke</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {(transfer.length != 0) ? transfer.map((item) => {
+            return (
+              <tr>
+                <td>{moment(item.createdAt).format('MMMM Do YYYY, h:mm a')}</td>
+                <td>{(item.stateFrom == '') ? '' : item.from}</td>
+                <td>{item.to}</td>
+                <td>{(item.stateFrom == '') ? `Pemilik pertama` : `${item.stateFrom} ->`} <b>{item.stateTo}</b> </td>
               </tr>
             )
           }) : <tr><td colSpan={4}><center>Tidak ada Record</center></td></tr>}

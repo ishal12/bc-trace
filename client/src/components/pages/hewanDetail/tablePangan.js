@@ -65,7 +65,7 @@ export default function TablePangan(props) {
           {(feed.length != 0) ? feed.map((item) => {
             return (
               <tr>
-                <td>{item.createdAt}</td>
+                <td>{moment(item.createdAt).format('MMMM Do YYYY, h:mm a')}</td>
                 <td>{item.feedType}</td>
                 <td className='text-right'>{item.amount.toLocaleString().replace(',', '.')} {item.measurement}</td>
                 <td>{item.actor}</td>

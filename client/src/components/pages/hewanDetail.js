@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { Form, Button, Row, Col, Table, Modal, Pagination } from 'react-bootstrap'
+import { Form, Button, Row, Col, Table, Modal, Pagination, Popover, OverlayTrigger } from 'react-bootstrap'
 import { ContractContext } from '../../context/contractContext';
 import web3 from 'web3'
 import axios from 'axios'
@@ -13,6 +13,17 @@ import TableTransfer from './hewanDetail/tableTransfer';
 import TableKesehatan from './hewanDetail/tableKesehatan';
 import TableBeratBadan from './hewanDetail/tableBeratBadan';
 import AlertBox from '../layout/alertBox';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
 
 function BeratBadan(props) {
   const { contract, setContract } = useContext(ContractContext)
@@ -81,7 +92,7 @@ function BeratBadan(props) {
               Berat
             </Form.Label>
             <Col sm={6}>
-              <Form.Control type="number" name="weight" min={0} onChange={(e) => handleTambahBB(e)} placeholder="Berat" value={tambahBB.weight} />
+              <Form.Control className='text-right' type="number" name="weight" min={0} onChange={(e) => handleTambahBB(e)} placeholder="Berat" value={tambahBB.weight} />
             </Col>
             <Form.Label className="text-left" column sm={2}>
               kg
@@ -93,7 +104,7 @@ function BeratBadan(props) {
               Lingkar Dada
             </Form.Label>
             <Col sm={6}>
-              <Form.Control type="number" name="heartGrith" min={0} onChange={(e) => handleTambahBB(e)} placeholder="Lingkar Dada" value={tambahBB.heartGrith} />
+              <Form.Control className='text-right' type="number" name="heartGrith" min={0} onChange={(e) => handleTambahBB(e)} placeholder="Lingkar Dada" value={tambahBB.heartGrith} />
             </Col>
             <Form.Label className="text-left" column sm={2}>
               cm
@@ -105,7 +116,7 @@ function BeratBadan(props) {
               Panjang
             </Form.Label>
             <Col sm={6}>
-              <Form.Control type="number" name="length" min={0} onChange={(e) => handleTambahBB(e)} placeholder="Panjang" value={tambahBB.length} />
+              <Form.Control className='text-right' type="number" name="length" min={0} onChange={(e) => handleTambahBB(e)} placeholder="Panjang" value={tambahBB.length} />
             </Col>
             <Form.Label className="text-left" column sm={2}>
               cm
@@ -249,7 +260,8 @@ function Transfer(props) {
   const [transfer, setTransfer] = useState({
     addressFrom: contract.accounts[0],
     addressTo: '',
-    id: props.idParams
+    id: props.idParams,
+    _id: props._idLs
   })
 
   const handleTransfer = (e) => {
@@ -259,7 +271,7 @@ function Transfer(props) {
     }))
   }
 
-  const transferLivestock = (_id, _from, _to) => {
+  const transferLivestock = (_id, _from, _to, _livestock) => {
     contract.contracts.methods.transfer(_id, _from, _to)
       .send({ from: contract.accounts[0] })
       .on('receipt', (receipt) => {
@@ -269,6 +281,14 @@ function Transfer(props) {
           })
           .then((res) => {
             console.log(res.data)
+            axios
+              .post(`http://localhost:3001/livestocks/transfer/add/${_id}`, {
+                _livestock: _livestock,
+                addressTo: _to,
+                addressFrom: _from,
+                txHash: receipt.transactionHash,
+              })
+              .then((resA) => console.log(resA.data))
             props.setAlertBox({
               variant: 'success',
               head: 'Berhasil mengirimkan hewan ternak',
@@ -326,7 +346,7 @@ function Transfer(props) {
         <Button variant="secondary" onClick={props.handleClose}>
           Batal
         </Button>
-        <Button variant="primary" onClick={(e) => { e.preventDefault(); transferLivestock(transfer.id, transfer.addressFrom, transfer.addressTo) }} >
+        <Button variant="primary" onClick={(e) => { e.preventDefault(); transferLivestock(transfer.id, transfer.addressFrom, transfer.addressTo, transfer._id) }} >
           Simpan
         </Button>
       </Modal.Footer>
@@ -441,7 +461,7 @@ function Pangan(props) {
               Jumlah Pangan
             </Form.Label>
             <Col sm={4}>
-              <Form.Control type="number" name="feedAmount" min={0} onChange={(e) => handleFeed(e)} placeholder="jumlah" value={feed.feedAmount} />
+              <Form.Control className='text-right' type="number" name="feedAmount" min={0} onChange={(e) => handleFeed(e)} placeholder="jumlah" value={feed.feedAmount} />
             </Col>
             <Col sm={3}>
               <Form.Control
@@ -474,7 +494,106 @@ function Pangan(props) {
   )
 }
 
+function ChartWeight(props) {
+  const { contract, setContract } = useContext(ContractContext)
+
+  ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend
+  );
+
+  const [options, setOptions] = useState({
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: false,
+        text: 'chart line',
+      },
+    },
+  })
+
+  // const [labels, setLabels] = useState([])
+
+  // const [datas, setDatas] = useState([])
+
+  const [data, setData] = useState({
+    labels: [],
+    datasets: [
+      {
+        label: 'Berat Badan',
+        data: [],
+        borderColor: 'rgb(255, 99, 132)',
+        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+      },
+    ],
+  })
+
+  // const getDataset = () => {
+  //   axios
+  //     .get(`http://localhost:3001/reports//blockchain/wRecord/line/${props.idParams}`)
+  //     .then((res) => {
+  //       setLabels(res.data.date)
+  //       setDatas(res.data.weight)
+  //     })
+  // }
+
+  useEffect(() => {
+    setData({
+      labels: props.label,
+      datasets: [
+        {
+          label: 'Berat Badan',
+          data: props.data,
+          borderColor: 'rgb(255, 99, 132)',
+          backgroundColor: 'rgba(255, 99, 132, 0.5)',
+        },
+      ],
+    })
+    console.log(props.label);
+  }, [])
+
+  return (
+    <>
+      {/* {console.log('data', labels)} */}
+      <Modal.Body>
+        <Line options={options} data={data} />
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={props.handleClose}>
+          Batal
+        </Button>
+      </Modal.Footer>
+    </>
+  )
+
+}
+
 function ModalComp(props) {
+
+  const [labels, setLabels] = useState([])
+
+  const [datas, setDatas] = useState([])
+
+  const getDataset = () => {
+    axios
+      .get(`http://localhost:3001/reports//blockchain/wRecord/line/${props.idParams}`)
+      .then((res) => {
+        setLabels(res.data.date)
+        setDatas(res.data.weight)
+      })
+  }
+
+  useEffect(() => {
+    getDataset()
+  }, [])
 
   return (
     <Modal show={props.show.view} onHide={props.handleClose}>
@@ -483,8 +602,9 @@ function ModalComp(props) {
       </Modal.Header>
       {(props.show.modal === 'beratBadan') ? <BeratBadan idParams={props.idParams} handleClose={props.handleClose} setAlertBox={props.setAlertBox} /> : ''}
       {(props.show.modal === 'kesehatan') ? <Kesehatan idParams={props.idParams} handleClose={props.handleClose} setAlertBox={props.setAlertBox} /> : ''}
-      {(props.show.modal === 'transfer') ? <Transfer idParams={props.idParams} handleClose={props.handleClose} setAlertBox={props.setAlertBox} /> : ''}
+      {(props.show.modal === 'transfer') ? <Transfer idParams={props.idParams} _idLs={props._idLs} handleClose={props.handleClose} setAlertBox={props.setAlertBox} /> : ''}
       {(props.show.modal === 'pangan') ? <Pangan idParams={props.idParams} _idLs={props._idLs} handleClose={props.handleClose} setAlertBox={props.setAlertBox} /> : ''}
+      {(props.show.modal === 'chart') ? <ChartWeight idParams={props.idParams} _idLs={props._idLs} handleClose={props.handleClose} setAlertBox={props.setAlertBox} label={labels} data={datas} /> : ''}
     </Modal >
   )
 }
@@ -528,6 +648,8 @@ export default function HewanDetail() {
       case 'pangan':
         setShow({ view: true, label: 'Tambah Pangan', modal: 'pangan' })
         break;
+      case 'chart':
+        setShow({ view: true, label: 'Chart Line Berat Badan', modal: 'chart' })
       default:
         break;
     }
@@ -576,6 +698,15 @@ export default function HewanDetail() {
     pageCount: 100 / 2,
     currentPage: 1
   })
+
+  const popover = (title, body) => (
+    <Popover id="popover-basic">
+      <Popover.Title as="h3">{title}</Popover.Title>
+      <Popover.Content>
+        {body}
+      </Popover.Content>
+    </Popover>
+  );
 
   const convertMoment = (dob) => {
     return moment().diff(moment.unix(dob / 1000000), 'days') + ' Hari'
@@ -638,13 +769,27 @@ export default function HewanDetail() {
             <h1>
               {objectId.name}
             </h1>
-            <h6 className="d-inline text-muted"># {livestock.ls.lsId}</h6>
-            <h6 className="d-inline text-muted pl-3"># {(livestock.ls.earTag) ? web3.utils.hexToUtf8(livestock.ls.earTag) : ''}</h6>
-            <h6 className="d-inline text-muted pl-3"># {convertMoment(livestock.ls.birthDay)}</h6>
-            <h6 className="d-inline text-muted pl-3"># {(livestock.ls.gender) ? 'Jantan' : 'Betina'}</h6>
-            <h6 className="d-inline text-muted pl-3"># {raceType[livestock.race]}</h6>
-            <h6 className="d-inline text-muted pl-3"># {(livestock.ls.status) ? 'Hidup' : 'Mati'}</h6>
-            <h6 className="d-inline text-muted pl-3"># {stateType[state[livestock.ls.stateCount - 1]]}</h6>
+            <OverlayTrigger trigger='hover' placement='right' overlay={popover('ID Sapi', 'ID Sapi digunakan pada jaringan blockchain.')}>
+              <h6 className="d-inline text-muted"># {livestock.ls.lsId}</h6>
+            </OverlayTrigger>
+            <OverlayTrigger trigger='hover' placement='right' overlay={popover('Eartag Sapi', 'Eartag yang terdapat pada sapi.')}>
+              <h6 className="d-inline text-muted pl-3"># {(livestock.ls.earTag) ? web3.utils.hexToUtf8(livestock.ls.earTag) : ''}</h6>
+            </OverlayTrigger>
+            <OverlayTrigger trigger='hover' placement='right' overlay={popover('Umur Sapi', 'Umur sapi dari lahir hingga saat ini.')}>
+              <h6 className="d-inline text-muted pl-3"># {convertMoment(livestock.ls.birthDay)}</h6>
+            </OverlayTrigger>
+            <OverlayTrigger trigger='hover' placement='right' overlay={popover('Jenis Kelamin', 'Jenis kelamin dari sapi.')}>
+              <h6 className="d-inline text-muted pl-3"># {(livestock.ls.gender) ? 'Jantan' : 'Betina'}</h6>
+            </OverlayTrigger>
+            <OverlayTrigger trigger='hover' placement='right' overlay={popover('Ras Sapi', 'Ras dari sapi')}>
+              <h6 className="d-inline text-muted pl-3"># {raceType[livestock.race]}</h6>
+            </OverlayTrigger>
+            <OverlayTrigger trigger='hover' placement='right' overlay={popover('Status', 'Status dari hidup tidaknya sapi.')}>
+              <h6 className="d-inline text-muted pl-3"># {(livestock.ls.status) ? 'Hidup' : 'Mati'}</h6>
+            </OverlayTrigger>
+            <OverlayTrigger trigger='hover' placement='right' overlay={popover('State', `Status rantai pasok pada sistem dimulai dari Farmer > Stocker > Butcher > Beef`)}>
+              <h6 className="d-inline text-muted pl-3"># {stateType[state[livestock.ls.stateCount - 1]]}</h6>
+            </OverlayTrigger>
           </>
         </Col>
         <Col xl={2}>
@@ -663,6 +808,7 @@ export default function HewanDetail() {
             Riwayat Berat Badan
           </h3>
           <Button className="d-inline float-right mb-3" value="beratBadan" disabled={(livestock.owner.userAddress === contract.accounts[0]) ? false : true} onClick={(e) => handleShow(e)}>Tambah</Button>
+          <Button className="d-inline float-right mb-3 mr-3" value="chart" disabled={(livestock.owner.userAddress === contract.accounts[0]) ? false : true} onClick={(e) => handleShow(e)} >Chart</Button>
           <TableBeratBadan id={id} convertMomentDate={convertMomentDate} />
         </Col>
       </Row>

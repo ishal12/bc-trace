@@ -606,11 +606,11 @@ export default function RPH() {
                       return (<tr>
                         <td>{item._livestock.name}</td>
                         <td>{raceType[item._livestock.race].label}</td>
-                        <td>{item._livestock.weight} kg</td>
-                        <td>{item._livestock.heartGrith} cm</td>
-                        <td>{item._livestock.length} cm</td>
+                        <td className='text-right'>{item._livestock.weight.toLocaleString().replace(',', '.')} kg</td>
+                        <td className='text-right'>{item._livestock.heartGrith.toLocaleString().replace(',', '.')} cm</td>
+                        <td className='text-right'>{item._livestock.length.toLocaleString().replace(',', '.')} cm</td>
                         <td>{item._livestock.gender ? 'Jantan' : 'Betina'}</td>
-                        <td>{item.age} Hari</td>
+                        <td className='text-right'>{item.age} Hari</td>
                         <td className="text-center">
                           <Button as="input" className="mr-3" type="button" onClick={(e) => handleShow(e, item)} value="Ante" disabled={(item.status == 'diproses') ? false : true} />
 

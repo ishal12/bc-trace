@@ -53,7 +53,8 @@ export default function ProsesDaging(props) {
   }
 
   const registerBeef = (_id, _lsId, _to, _age) => {
-    contract.contracts.methods.registerBeef(_lsId, _to)
+    console.log(moment.unix(new Date())._i)
+    contract.contracts.methods.registerBeef(_lsId, _to, moment.unix(new Date())._i)
       .send({ from: contract.accounts[0] })
       .on('receipt', (receipt) => {
         axios
@@ -148,7 +149,7 @@ export default function ProsesDaging(props) {
             Berat
           </Form.Label>
           <Col sm={1}>
-            <Form.Control className="text-right" plaintext readOnly placeholder="Berat" value={viewHewan.weight} />
+            <Form.Control className="text-right" plaintext readOnly placeholder="Berat" value={(viewHewan.weight).toLocaleString().replace(',', '.')} />
           </Col>
           <Form.Label className="text-left" column sm={1}>
             kg
